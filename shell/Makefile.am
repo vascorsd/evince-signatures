@@ -85,6 +85,8 @@ evince_SOURCES=				\
 	ev-sidebar-page.h		\
 	ev-sidebar-thumbnails.c		\
 	ev-sidebar-thumbnails.h		\
+	ev-sidebar-signatures.c		\
+	ev-sidebar-signatures.h		\
 	main.c
 
 nodist_evince_SOURCES = \
