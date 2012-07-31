@@ -81,6 +81,7 @@
 #include "ev-sidebar-page.h"
 #include "ev-sidebar-thumbnails.h"
 #include "ev-sidebar-layers.h"
+#include "ev-sidebar-signatures.h"
 #include "ev-stock-icons.h"
 #include "ev-utils.h"
 #include "ev-keyring.h"
@@ -142,6 +143,7 @@ struct _EvWindowPrivate {
 	GtkWidget *sidebar_layers;
 	GtkWidget *sidebar_annots;
 	GtkWidget *sidebar_bookmarks;
+  GtkWidget *sidebar_signatures;
 
 	/* Settings */
 	GSettings *settings;
@@ -256,6 +258,7 @@ struct _EvWindowPrivate {
 #define LAYERS_SIDEBAR_ID "layers"
 #define ANNOTS_SIDEBAR_ID "annotations"
 #define BOOKMARKS_SIDEBAR_ID "bookmarks"
+#define SIGNATURES_SIDEBAR_ID "signatures"
 
 #define EV_PRINT_SETTINGS_FILE  "print-settings"
 #define EV_PRINT_SETTINGS_GROUP "Print Settings"
@@ -1004,7 +1007,9 @@ ev_window_sidebar_get_current_page_id (EvWindow *ev_window)
 		id = ANNOTS_SIDEBAR_ID;
 	} else if (current_page == ev_window->priv->sidebar_bookmarks) {
 		id = BOOKMARKS_SIDEBAR_ID;
-	} else {
+  } else if (current_page == ev_window->priv->sidebar_signatures) {
+    id = SIGNATURES_SIDEBAR_ID;
+  } else {
 		g_assert_not_reached();
 	}
 
@@ -1025,6 +1030,7 @@ ev_window_sidebar_set_current_page (EvWindow    *window,
 	GtkWidget  *annots = window->priv->sidebar_annots;
 	GtkWidget  *layers = window->priv->sidebar_layers;
 	GtkWidget  *bookmarks = window->priv->sidebar_bookmarks;
+  GtkWidget  *signatures = window->priv->sidebar_signatures;
 
 	if (strcmp (page_id, LINKS_SIDEBAR_ID) == 0 &&
 	    ev_sidebar_page_support_document (EV_SIDEBAR_PAGE (links), document)) {
@@ -1044,7 +1050,10 @@ ev_window_sidebar_set_current_page (EvWindow    *window,
 	} else if (strcmp (page_id, BOOKMARKS_SIDEBAR_ID) == 0 &&
 		   ev_sidebar_page_support_document (EV_SIDEBAR_PAGE (bookmarks), document)) {
 		ev_sidebar_set_page (sidebar, bookmarks);
-	}
+	} else if (strcmp (page_id, SIGNATURES_SIDEBAR_ID) == 0 &&
+	     ev_sidebar_page_support_document (EV_SIDEBAR_PAGE (signatures), document)) {
+	  ev_sidebar_set_page (sidebar, signatures);
+  }
 }
 
 static void
@@ -6167,6 +6176,7 @@ register_custom_actions (EvWindow *window, GtkActionGroup *group)
 	g_signal_connect (action, "activate_link",
 			  G_CALLBACK (activate_link_cb), window);
 	gtk_action_group_add_action (group, action);
+
 	g_object_unref (action);
 
 	action = g_object_new (EPHY_TYPE_ZOOM_ACTION,
@@ -7412,6 +7422,7 @@ ev_window_init (EvWindow *ev_window)
 
 	/* Stub sidebar, for now */
 
+  // -------------------------------------------------- adicionar thumbnails à view
 	sidebar_widget = ev_sidebar_thumbnails_new ();
 	ev_window->priv->sidebar_thumbs = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7423,6 +7434,7 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
+  // ------------------------------------------------ adicionar links à view
 	sidebar_widget = ev_sidebar_links_new ();
 	ev_window->priv->sidebar_links = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7438,6 +7450,7 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
+  // ----------------------------------------------- adicionar attachments à view
 	sidebar_widget = ev_sidebar_attachments_new ();
 	ev_window->priv->sidebar_attachments = sidebar_widget;
 	g_signal_connect_object (sidebar_widget,
@@ -7448,6 +7461,7 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
+  // ----------------------------------------------- adicionar layers à view
 	sidebar_widget = ev_sidebar_layers_new ();
 	ev_window->priv->sidebar_layers = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7458,6 +7472,7 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
+  // ----------------------------------------------- adicionar anotações à view
 	sidebar_widget = ev_sidebar_annotations_new ();
 	ev_window->priv->sidebar_annots = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7476,6 +7491,7 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
+  // ------------------------------------------------ adicionar bookmarks à view
 	sidebar_widget = ev_sidebar_bookmarks_new ();
 	ev_window->priv->sidebar_bookmarks = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7485,6 +7501,18 @@ ev_window_init (EvWindow *ev_window)
 	gtk_widget_show (sidebar_widget);
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
+
+  // -------------------------------------------- futuro adicionar signatures à view
+  // sidebar_widget = ev_sidebar_signatures_new ();
+  // ev_window->priv->sidebar_signatures = sidebar_widget;
+  // ------------- conectar signals
+  //
+  // -------------
+  // gtk_widget_show (sidebar_widget);
+  // ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
+  //          sidebar_widget);
+  // ---------------------------------------------
+
 
 	ev_window->priv->view_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	ev_window->priv->scrolled_window =
