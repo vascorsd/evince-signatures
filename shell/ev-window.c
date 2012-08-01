@@ -7430,14 +7430,14 @@ ev_window_init (EvWindow *ev_window)
 			     sidebar_widget);
 
   // -------------------------------------------- futuro adicionar signatures à view
-  // sidebar_widget = ev_sidebar_signatures_new ();
-  // ev_window->priv->sidebar_signatures = sidebar_widget;
+  sidebar_widget = ev_sidebar_signatures_new ();
+  ev_window->priv->sidebar_signatures = sidebar_widget;
   // ------------- conectar signals
   //
   // -------------
-  // gtk_widget_show (sidebar_widget);
-  // ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
-  //          sidebar_widget);
+  gtk_widget_show (sidebar_widget);
+  ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
+           sidebar_widget);
   // ---------------------------------------------
 
 
