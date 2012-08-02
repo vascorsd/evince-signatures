@@ -22,7 +22,6 @@
 #define __EV_SIDEBAR_SIGNATURES_H__
 
 #include <gtk/gtk.h>
-#include <glib-object.h>
 
 G_BEGIN_DECLS
 

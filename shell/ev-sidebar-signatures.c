@@ -20,18 +20,16 @@
 
 #include "config.h"
 
-#include <gtk/gtk.h>
-#include <glib/gi18n.h>
-#include <glib/gstdio.h>
-#include <glib-object.h>
+#include <glib/gi18n.h>             // ---- support for translation
 
-#include "ev-sidebar-signatures.h"
-#include "ev-sidebar-page.h"
+#include "ev-sidebar-signatures.h"  // ----- my header file
+#include "ev-sidebar-page.h"        // ----- needed for all the Ev* objects and stuff
 
 struct _EvSidebarSignaturesPrivate {
-  //GtkWidget *tree_view;
+  GtkWidget *swindow;
+  GtkWidget *tree_view;
 
-  GtkWidget *label;
+  //GtkWidget *label;
 };
 
 enum {
@@ -56,6 +54,9 @@ static void ev_sidebar_signatures_get_property         (GObject                 
                                                         GValue                    *value,
                                                         GParamSpec                *pspec);
 static void ev_sidebar_signatures_dispose              (GObject                   *object);
+
+// -------------------------------------------------------------------------------------- define my functions
+static void ev_sidebar_signatures_construct_tree_view (EvSidebarSignaturesPrivate *priv);
 
 // --------------------------------------------------------------- set this object to implement the interface
 G_DEFINE_TYPE_EXTENDED (EvSidebarSignatures,
@@ -82,14 +83,14 @@ static gboolean
 ev_sidebar_signatures_support_document (EvSidebarPage   *sidebar_page,
                                         EvDocument      *document)
 {
-  g_printf("ev-sidebar-signatures::ev_sidebar_signatures_support_document, called!\n");
+  g_print("ev-sidebar-signatures::ev_sidebar_signatures_support_document, called!\n");
   return TRUE;
 }
 
 static const gchar *
 ev_sidebar_signatures_get_label (EvSidebarPage *sidebar_page)
 {
-  g_printf("ev-sidebar-signatures::ev_sidebar_signatures_get_label, called!\n");
+  g_print("ev-sidebar-signatures::ev_sidebar_signatures_get_label, called!\n");
   return _("Signatures");
 }
 
@@ -97,7 +98,7 @@ static void
 ev_sidebar_signatures_set_model (EvSidebarPage   *sidebar_page,
                                  EvDocumentModel *model)
 {
-  g_printf("ev-sidebar-signatures::ev_sidebar_signatures_set_model, called!\n");
+  g_print("ev-sidebar-signatures::ev_sidebar_signatures_set_model, called!\n");
 }
 
 // ----------------------------------------------------------------------------------- Object construction
@@ -110,14 +111,30 @@ ev_sidebar_signatures_new (void)
 static void
 ev_sidebar_signatures_init (EvSidebarSignatures *ev_sign)
 {
+  EvSidebarSignaturesPrivate *priv;
+
   // initialize the private structure that holds everything we need
-  ev_sign->priv = EV_SIDEBAR_SIGNATURES_GET_PRIVATE (ev_sign);
+  priv = ev_sign->priv = EV_SIDEBAR_SIGNATURES_GET_PRIVATE (ev_sign);
+
+  // create a scrolled window for the sidebar
+  priv->swindow = gtk_scrolled_window_new (NULL, NULL);
+
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (priv->swindow),
+                                       GTK_SHADOW_IN);
 
   // create a label, just for example
-  ev_sign->priv->label = gtk_label_new ("Olá mundo!");
+  //ev_sign->priv->label = gtk_label_new ("Hello World!--------------------------------------------------------------------------------------------------");
 
-  // add the created widgets to the container and show everything
-  gtk_container_add (GTK_CONTAINER (ev_sign), ev_sign->priv->label);
+  // the main widget of the sidebar will be the scrollable area
+  gtk_box_pack_start (GTK_BOX (ev_sign), priv->swindow, TRUE, TRUE, 0);
+
+  // create the tree view
+  ev_sidebar_signatures_construct_tree_view (priv);
+
+  // add other widgets inside that sroll area
+  gtk_container_add (GTK_CONTAINER (priv->swindow), ev_sign->priv->tree_view);
+  //gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW(priv->swindow), ev_sign->priv->label); //just to test, label is not scrollable by default
+
   gtk_widget_show_all (GTK_WIDGET (ev_sign));
 }
 
@@ -125,10 +142,10 @@ static void
 ev_sidebar_signatures_class_init (EvSidebarSignaturesClass *ev_sidebar_signatures_class)
 {
   GObjectClass *g_object_class;
-  GtkWidgetClass *gtk_widget_class;
+  //GtkWidgetClass *gtk_widget_class;
 
   g_object_class = G_OBJECT_CLASS (ev_sidebar_signatures_class);
-  gtk_widget_class = GTK_WIDGET_CLASS (ev_sidebar_signatures_class);
+  //gtk_widget_class = GTK_WIDGET_CLASS (ev_sidebar_signatures_class);
 
   g_object_class->get_property = ev_sidebar_signatures_get_property;
   g_object_class->dispose = ev_sidebar_signatures_dispose;
@@ -148,8 +165,8 @@ ev_sidebar_signatures_get_property (GObject    *object,
 
   switch (prop_id) {
   case PROP_WIDGET:
-    //g_value_set_object (value, sidebar->priv->tree_view);
-    g_value_set_object (value, sidebar->priv->label);
+    g_value_set_object (value, sidebar->priv->tree_view);
+    //g_value_set_object (value, sidebar->priv->label);
   break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -163,4 +180,29 @@ ev_sidebar_signatures_dispose (GObject *object)
   //EvSidebarSignatures *sidebar = EV_SIDEBAR_SIGNATURES (object);
 
   // we should clean the stuff we use. understand this better, unrefs and etc
+}
+
+// ----------------------------------------------------------------------------------- And my functions
+static void
+ev_sidebar_signatures_construct_tree_view (EvSidebarSignaturesPrivate *priv)
+{
+  GtkWidget *tree_view = gtk_tree_view_new ();
+
+  // construct everything related to the tree view
+  ev_sidebar_signatures_tree_view_load_model (tree_view);
+
+
+  priv->tree_view = tree_view;
+}
+
+static void
+ev_sidebar_signatures_tree_view_load_model (GtkWidget *tree_view)
+{
+  //GtkTreeStore *store = gtk_tree_store_new ()
+  //GtkTreeIter iter;
+
+  //gtk_tree_store_append (store, &iter);
+  //gtk_tree_store_set (store, &iter, .... );
+
+  //gtk_tree_view_set_model (GTK_TREE_VIEW (tree_view), GTK_TREE_MODEL(model));
 }
