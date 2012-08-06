@@ -20,10 +20,12 @@
 
 #include "config.h"
 
-#include <glib/gi18n.h>             // ---- support for translation
+#include <glib/gi18n.h>             // ----- support for translation
 
 #include "ev-sidebar-signatures.h"  // ----- my header file
 #include "ev-sidebar-page.h"        // ----- needed for all the Ev* objects and stuff
+
+#include "ev-document-signatures.h" // ----- implement the document interface
 
 struct _EvSidebarSignaturesPrivate {
   GtkWidget *swindow;
@@ -93,7 +95,8 @@ ev_sidebar_signatures_support_document (EvSidebarPage   *sidebar_page,
                                         EvDocument      *document)
 {
   g_print("ev-sidebar-signatures::ev_sidebar_signatures_support_document, called!\n");
-  return TRUE;
+  return (EV_IS_DOCUMENT_SIGNATURES (document) &&
+          ev_document_signatures_has_signatures (EV_DOCUMENT_SIGNATURES (document)));
 }
 
 static const gchar *
