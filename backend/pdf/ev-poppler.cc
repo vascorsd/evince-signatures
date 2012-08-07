@@ -50,6 +50,7 @@
 #include "ev-document-annotations.h"
 #include "ev-document-attachments.h"
 #include "ev-document-text.h"
+#include "ev-document-signatures.h"
 #include "ev-selection.h"
 #include "ev-transition-effect.h"
 #include "ev-attachment.h"
@@ -121,6 +122,7 @@ static void pdf_document_document_layers_iface_init      (EvDocumentLayersInterf
 static void pdf_document_document_print_iface_init       (EvDocumentPrintInterface       *iface);
 static void pdf_document_document_annotations_iface_init (EvDocumentAnnotationsInterface *iface);
 static void pdf_document_document_attachments_iface_init (EvDocumentAttachmentsInterface *iface);
+static void pdf_document_document_signatures_iface_init  (EvDocumentSignaturesInterface  *iface);
 static void pdf_document_find_iface_init                 (EvDocumentFindInterface        *iface);
 static void pdf_document_file_exporter_iface_init        (EvFileExporterInterface        *iface);
 static void pdf_selection_iface_init                     (EvSelectionInterface           *iface);
@@ -158,6 +160,8 @@ EV_BACKEND_REGISTER_WITH_CODE (PdfDocument, pdf_document,
 								 pdf_document_document_annotations_iface_init);
 				 EV_BACKEND_IMPLEMENT_INTERFACE (EV_TYPE_DOCUMENT_ATTACHMENTS,
 								 pdf_document_document_attachments_iface_init);
+				 EV_BACKEND_IMPLEMENT_INTERFACE (EV_TYPE_DOCUMENT_SIGNATURES,
+				         pdf_document_document_signatures_iface_init);
 				 EV_BACKEND_IMPLEMENT_INTERFACE (EV_TYPE_DOCUMENT_FIND,
 								 pdf_document_find_iface_init);
 				 EV_BACKEND_IMPLEMENT_INTERFACE (EV_TYPE_FILE_EXPORTER,
@@ -3310,4 +3314,29 @@ pdf_document_document_layers_iface_init (EvDocumentLayersInterface *iface)
 	iface->show_layer = pdf_document_layers_show_layer;
 	iface->hide_layer = pdf_document_layers_hide_layer;
 	iface->layer_is_visible = pdf_document_layers_layer_is_visible;
+}
+
+/* Signatures */
+static gboolean
+pdf_document_signatures_has_signatures (EvDocumentSignatures *document)
+{
+  return TRUE;
+}
+
+static GList *
+pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
+{
+  GList *list = NULL;
+
+  list = g_list_append (list, (void*)"first");
+  list = g_list_append (list, (void*)"second");
+
+  return list;
+}
+
+static void
+pdf_document_document_signatures_iface_init (EvDocumentSignaturesInterface *iface)
+{
+  iface->has_signatures = pdf_document_signatures_has_signatures;
+  iface->get_signatures = pdf_document_signatures_get_signatures;
 }

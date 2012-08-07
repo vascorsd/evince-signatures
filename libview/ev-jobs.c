@@ -35,6 +35,7 @@
 #include "ev-document-print.h"
 #include "ev-document-annotations.h"
 #include "ev-document-attachments.h"
+#include "ev-document-signatures.h"
 #include "ev-document-text.h"
 #include "ev-debug.h"
 
@@ -51,6 +52,8 @@ static void ev_job_attachments_init       (EvJobAttachments      *job);
 static void ev_job_attachments_class_init (EvJobAttachmentsClass *class);
 static void ev_job_annots_init            (EvJobAnnots           *job);
 static void ev_job_annots_class_init      (EvJobAnnotsClass      *class);
+static void ev_job_signatures_init        (EvJobSignatures       *job);
+static void ev_job_signatures_class_init  (EvJobSignaturesClass  *class);
 static void ev_job_render_init            (EvJobRender           *job);
 static void ev_job_render_class_init      (EvJobRenderClass      *class);
 static void ev_job_page_data_init         (EvJobPageData         *job);
@@ -94,6 +97,7 @@ G_DEFINE_ABSTRACT_TYPE (EvJob, ev_job, G_TYPE_OBJECT)
 G_DEFINE_TYPE (EvJobLinks, ev_job_links, EV_TYPE_JOB)
 G_DEFINE_TYPE (EvJobAttachments, ev_job_attachments, EV_TYPE_JOB)
 G_DEFINE_TYPE (EvJobAnnots, ev_job_annots, EV_TYPE_JOB)
+G_DEFINE_TYPE (EvJobSignatures, ev_job_signatures, EV_TYPE_JOB)
 G_DEFINE_TYPE (EvJobRender, ev_job_render, EV_TYPE_JOB)
 G_DEFINE_TYPE (EvJobPageData, ev_job_page_data, EV_TYPE_JOB)
 G_DEFINE_TYPE (EvJobThumbnail, ev_job_thumbnail, EV_TYPE_JOB)
@@ -554,6 +558,72 @@ ev_job_annots_new (EvDocument *document)
 	job->document = g_object_ref (document);
 
 	return job;
+}
+
+/* EvJobSignatures */
+static void
+ev_job_signatures_init (EvJobSignatures *job)
+{
+  EV_JOB (job)->run_mode = EV_JOB_RUN_THREAD;
+}
+
+static void
+ev_job_signatures_dispose (GObject *object)
+{
+  EvJobSignatures *job;
+
+  ev_debug_message (DEBUG_JOBS, NULL);
+
+  job = EV_JOB_SIGNATURES (object);
+
+  if (job->signatures) {
+    g_list_foreach (job->signatures, (GFunc)g_object_unref, NULL);
+    g_list_free (job->signatures);
+    job->signatures = NULL;
+  }
+
+  (* G_OBJECT_CLASS (ev_job_signatures_parent_class)->dispose) (object);
+}
+
+static gboolean
+ev_job_signatures_run (EvJob *job)
+{
+  EvJobSignatures *job_signatures = EV_JOB_SIGNATURES (job);
+
+  ev_debug_message (DEBUG_JOBS, NULL);
+  ev_profiler_start (EV_PROFILE_JOBS, "%s (%p)", EV_GET_TYPE_NAME (job), job);
+
+  ev_document_doc_mutex_lock ();
+  job_signatures->signatures =
+    ev_document_signatures_get_signatures (EV_DOCUMENT_SIGNATURES (job->document));
+  ev_document_doc_mutex_unlock ();
+
+  ev_job_succeeded (job);
+
+  return FALSE;
+}
+
+static void
+ev_job_signatures_class_init (EvJobSignaturesClass *class)
+{
+  GObjectClass *oclass = G_OBJECT_CLASS (class);
+  EvJobClass   *job_class = EV_JOB_CLASS (class);
+
+  oclass->dispose = ev_job_signatures_dispose;
+  job_class->run = ev_job_signatures_run;
+}
+
+EvJob *
+ev_job_signatures_new (EvDocument *document)
+{
+  EvJob *job;
+
+  ev_debug_message (DEBUG_JOBS, NULL);
+
+  job = g_object_new (EV_TYPE_JOB_SIGNATURES, NULL);
+  job->document = g_object_ref (document);
+
+  return job;
 }
 
 /* EvJobRender */
