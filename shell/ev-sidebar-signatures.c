@@ -24,8 +24,9 @@
 
 #include "ev-sidebar-signatures.h"  // ----- my header file
 #include "ev-sidebar-page.h"        // ----- needed for all the Ev* objects and stuff
-
 #include "ev-document-signatures.h" // ----- implement the document interface
+#include "ev-jobs.h"                // ----- this one is needed for the threads
+#include "ev-job-scheduler.h"       // ----- and with this we can change threads priority
 
 struct _EvSidebarSignaturesPrivate {
   GtkWidget *swindow;
@@ -68,6 +69,11 @@ static GtkTreeModel* ev_sidebar_signatures_tree_create_load_model (void);
 
 static void ev_sidebar_signatures_tree_sign_info       (GtkTreeStore *store,
                                                         GtkTreeIter  *iter);
+static void job_finished_callback                      (EvJobSignatures            *job,
+                                                        EvSidebarSignatures        *sidebar);
+static void ev_sidebar_signatures_document_changed_cb  (EvDocumentModel            *model,
+                                                        GParamSpec                 *pspec,
+                                                        EvSidebarSignatures        *sidebar_sign);
 
 // --------------------------------------------------------------- set this object to implement the interface
 G_DEFINE_TYPE_EXTENDED (EvSidebarSignatures,
@@ -102,8 +108,33 @@ ev_sidebar_signatures_support_document (EvSidebarPage   *sidebar_page,
 static const gchar *
 ev_sidebar_signatures_get_label (EvSidebarPage *sidebar_page)
 {
-  g_print("ev-sidebar-signatures::ev_sidebar_signatures_get_label, called!\n");
   return _("Signatures");
+}
+
+static void
+job_finished_callback (EvJobSignatures *job, EvSidebarSignatures *sidebar)
+{
+  GList *l;
+	
+	for (l = job->signatures; l && l->data; l = g_list_next (l)) {
+    g_print("ev-sidebar-signatures::---- %s\n", l->data);
+  }
+}
+
+static void
+ev_sidebar_signatures_document_changed_cb (EvDocumentModel     *model,
+                                           GParamSpec          *pspec,
+                                           EvSidebarSignatures *sidebar_sign)
+{
+  EvDocument *document = ev_document_model_get_document (model);
+  EvJob *job = ev_job_signatures_new (document);
+  
+  g_signal_connect (job, "finished",
+			  G_CALLBACK (job_finished_callback),
+			  sidebar_sign);
+  
+  /* The priority doesn't matter for this job */
+	ev_job_scheduler_push_job (job, EV_JOB_PRIORITY_NONE);
 }
 
 static void
@@ -111,6 +142,10 @@ ev_sidebar_signatures_set_model (EvSidebarPage   *sidebar_page,
                                  EvDocumentModel *model)
 {
   g_print("ev-sidebar-signatures::ev_sidebar_signatures_set_model, called!\n");
+  
+  g_signal_connect (model, "notify::document",
+        G_CALLBACK (ev_sidebar_signatures_document_changed_cb),
+			  sidebar_page);
 }
 
 // ----------------------------------------------------------------------------------- Object construction
@@ -216,7 +251,6 @@ ev_sidebar_signatures_construct_tree_view ()
   GtkTreeModel *model = ev_sidebar_signatures_tree_create_load_model ();
 
   // make the associations for it to show something
-  gtk_tree_view_column_set_title (col, "Signatures");
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree_view), col);
 
   gtk_tree_view_column_pack_start (col, renderer, TRUE);

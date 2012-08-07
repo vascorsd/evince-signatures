@@ -54,6 +54,9 @@ typedef struct _EvJobAttachmentsClass EvJobAttachmentsClass;
 typedef struct _EvJobAnnots EvJobAnnots;
 typedef struct _EvJobAnnotsClass EvJobAnnotsClass;
 
+typedef struct _EvJobSignatures EvJobSignatures;
+typedef struct _EvJobSignaturesClass EvJobSignaturesClass;
+
 typedef struct _EvJobFonts EvJobFonts;
 typedef struct _EvJobFontsClass EvJobFontsClass;
 
@@ -101,6 +104,11 @@ typedef struct _EvJobPrintClass EvJobPrintClass;
 #define EV_JOB_ANNOTS(object)                (G_TYPE_CHECK_INSTANCE_CAST((object), EV_TYPE_JOB_ANNOTS, EvJobAnnots))
 #define EV_JOB_ANNOTS_CLASS(klass)           (G_TYPE_CHECK_CLASS_CAST((klass), EV_TYPE_JOB_ANNOTS, EvJobAnnotsClass))
 #define EV_IS_JOB_ANNOTS(object)             (G_TYPE_CHECK_INSTANCE_TYPE((object), EV_TYPE_JOB_ANNOTS))
+
+#define EV_TYPE_JOB_SIGNATURES               (ev_job_signatures_get_type())
+#define EV_JOB_SIGNATURES(object)            (G_TYPE_CHECK_INSTANCE_CAST((object), EV_TYPE_JOB_SIGNATURES, EvJobSignatures))
+#define EV_JOB_SIGNATURES_CLASS(klass)       (G_TYPE_CHECK_CLASS_CAST((klass), EV_TYPE_JOB_SIGNATURES, EvJobSignaturesClass))
+#define EV_IS_JOB_SIGNATURES(object)         (G_TYPE_CHECK_INSTANCE_TYPE((object), EV_TYPE_JOB_SIGNATURES))
 
 #define EV_TYPE_JOB_RENDER		     (ev_job_render_get_type())
 #define EV_JOB_RENDER(object)		     (G_TYPE_CHECK_INSTANCE_CAST((object), EV_TYPE_JOB_RENDER, EvJobRender))
@@ -231,6 +239,18 @@ struct _EvJobAnnots
 struct _EvJobAnnotsClass
 {
 	EvJobClass parent_class;
+};
+
+struct _EvJobSignatures
+{
+  EvJob parent;
+
+  GList *signatures;
+};
+
+struct _EvJobSignaturesClass
+{
+  EvJobClass parent_class;
 };
 
 struct _EvJobRender
@@ -469,6 +489,10 @@ EvJob          *ev_job_attachments_new      (EvDocument     *document);
 /* EvJobAnnots */
 GType           ev_job_annots_get_type      (void) G_GNUC_CONST;
 EvJob          *ev_job_annots_new           (EvDocument     *document);
+
+/* EvJobSignatures */
+GType           ev_job_signatures_get_type  (void) G_GNUC_CONST;
+EvJob          *ev_job_signatures_new       (EvDocument     *document);
 
 /* EvJobRender */
 GType           ev_job_render_get_type    (void) G_GNUC_CONST;
