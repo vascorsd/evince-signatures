@@ -9,6 +9,7 @@ INST_H_SRC_FILES = 				\
 	ev-annotation.h				\
 	ev-async-renderer.h			\
 	ev-attachment.h				\
+	ev-signature.h				\
 	ev-backends-manager.h			\
 	ev-document-factory.h			\
 	ev-document-annotations.h		\
@@ -55,6 +56,7 @@ libevdocument3_la_SOURCES=			\
 	ev-annotation.c				\
 	ev-async-renderer.c			\
 	ev-attachment.c				\
+	ev-signature.c				\
 	ev-backend-info.c			\
 	ev-layer.c				\
 	ev-link.c				\

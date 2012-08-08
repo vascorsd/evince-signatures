@@ -54,6 +54,7 @@
 #include "ev-selection.h"
 #include "ev-transition-effect.h"
 #include "ev-attachment.h"
+#include "ev-signature.h"
 #include "ev-image.h"
 
 #include <libxml/tree.h>
@@ -3326,12 +3327,19 @@ pdf_document_signatures_has_signatures (EvDocumentSignatures *document)
 static GList *
 pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
 {
-  GList *list = NULL;
+  GList *ret_list = NULL;
 
-  list = g_list_append (list, (void*)"first");
-  list = g_list_append (list, (void*)"second");
+  // real code getting info from poppler should go here.
+  // for now just some dummy data to test the gui.
+  EvSignature *sign1 = ev_signature_new ("Cp. Barbosa", TRUE, FALSE, 30000);
+  EvSignature *sign2 = ev_signature_new ("Mr. Bond", FALSE, TRUE, 10);
+  EvSignature *sign3 = ev_signature_new ("Goodman SA", TRUE, TRUE, 50000);
 
-  return list;
+  ret_list = g_list_append (ret_list, sign1);
+  ret_list = g_list_append (ret_list, sign2);
+  ret_list = g_list_append (ret_list, sign3);
+
+  return ret_list;
 }
 
 static void
