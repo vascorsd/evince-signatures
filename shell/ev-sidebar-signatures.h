@@ -23,6 +23,8 @@
 
 #include <gtk/gtk.h>
 
+#include "ev-signature.h"
+
 G_BEGIN_DECLS
 
 typedef struct _EvSidebarSignatures        EvSidebarSignatures;

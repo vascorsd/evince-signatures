@@ -117,7 +117,10 @@ job_finished_callback (EvJobSignatures *job, EvSidebarSignatures *sidebar)
   GList *l;
 	
 	for (l = job->signatures; l && l->data; l = g_list_next (l)) {
-    g_print("ev-sidebar-signatures::---- %s\n", l->data);
+    EvSignature *signature = EV_SIGNATURE (l->data);
+    const gchar *signer = ev_signature_get_signer_name (signature);
+    
+    g_print("ev-sidebar-signatures::---- %s\n", signer);
   }
 }
 
