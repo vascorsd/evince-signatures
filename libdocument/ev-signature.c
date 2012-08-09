@@ -93,12 +93,44 @@ ev_signature_set_property (GObject      *object,
 }
 
 static void
+ev_signature_get_property (GObject    *object,
+                           guint       property_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
+{
+  EvSignature *signature = EV_SIGNATURE (object);
+
+  switch (property_id)
+    {
+    case PROP_NAME:
+      g_value_set_string (value, signature->priv->name); 
+      break;
+
+    case PROP_DOC_VALID:
+      g_value_set_boolean (value, signature->priv->is_doc_valid);
+      break;
+
+    case PROP_ID_KNOWN:
+      g_value_set_boolean (value, signature->priv->is_id_known);
+      break;
+
+    case PROP_SIGN_DATE:
+      
+      break;
+
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    }
+}
+
+static void
 ev_signature_class_init (EvSignatureClass *klass)
 {
   GObjectClass *g_object_class = G_OBJECT_CLASS (klass);
 
   g_object_class->set_property = ev_signature_set_property;
-  
+  g_object_class->get_property = ev_signature_get_property;
+
   g_type_class_add_private (g_object_class, sizeof (EvSignaturePrivate));
   
   /* Properties */
@@ -108,7 +140,7 @@ ev_signature_class_init (EvSignatureClass *klass)
                                                         "Name",
                                                         "The name of the entity that signed",
                                                         NULL,
-                                                        G_PARAM_WRITABLE |
+                                                        G_PARAM_READWRITE |
                                                         G_PARAM_CONSTRUCT_ONLY |
                                                         G_PARAM_STATIC_STRINGS));
 
@@ -118,7 +150,7 @@ ev_signature_class_init (EvSignatureClass *klass)
                                                         "IsDocumentValid",
                                                         "If the document signed with the signature is valid",
                                                         FALSE,
-                                                        G_PARAM_WRITABLE |
+                                                        G_PARAM_READWRITE |
                                                         G_PARAM_CONSTRUCT_ONLY |
                                                         G_PARAM_STATIC_STRINGS));
 
@@ -128,7 +160,7 @@ ev_signature_class_init (EvSignatureClass *klass)
                                                         "IsIdentityKnown",
                                                         "If the entity that signed is known",
                                                         FALSE,
-                                                        G_PARAM_WRITABLE |
+                                                        G_PARAM_READWRITE |
                                                         G_PARAM_CONSTRUCT_ONLY |
                                                         G_PARAM_STATIC_STRINGS));
 
@@ -138,7 +170,7 @@ ev_signature_class_init (EvSignatureClass *klass)
                                                        "SignatureDate",
                                                        "The date associated with the signature",
                                                        0, G_MAXULONG, 0,
-                                                       G_PARAM_WRITABLE |
+                                                       G_PARAM_READWRITE |
                                                        G_PARAM_CONSTRUCT_ONLY |
                                                        G_PARAM_STATIC_STRINGS));
 
@@ -168,7 +200,7 @@ ev_signature_new (const gchar  *signer_name,
 
   return signature;
 }
-
+/*
 const gchar *
 ev_signature_get_signer_name (EvSignature *signature)
 {
@@ -199,4 +231,5 @@ ev_signature_get_sign_date (EvSignature *signature)
   g_return_val_if_fail (EV_IS_SIGNATURE (signature), 0);
   
   return signature->priv->sign_date;
-}
+} 
+*/
