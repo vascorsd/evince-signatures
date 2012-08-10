@@ -144,6 +144,8 @@ job_finished_callback (EvJobSignatures *job, EvSidebarSignatures *sidebar)
     g_print("ev-sidebar-signatures::---- known: %d\n", is_id_known);
     g_print("ev-sidebar-signatures::---- time: %s\n", sign_time);
     g_print("----------------\n"); */
+    
+    //g_object_unref (job);
   }
 }
 
