@@ -56,14 +56,7 @@ GType         ev_signature_get_type                (void) G_GNUC_CONST;
 EvSignature  *ev_signature_new                     (const gchar  *signer_name,
                                                     gboolean     is_document_valid,
                                                     gboolean     is_identity_known,
-                                                    GTime        signature_date);
-/*
-const gchar  *ev_signature_get_signer_name         (EvSignature *signature);
-gboolean      ev_signature_get_is_doc_valid        (EvSignature *signature);
-gboolean      ev_signature_get_is_identity_known   (EvSignature *signature);
-GTime         ev_signature_get_sign_date           (EvSignature *signature);
-*/
-
+                                                    const gchar  *signature_time);
 
 G_END_DECLS
 

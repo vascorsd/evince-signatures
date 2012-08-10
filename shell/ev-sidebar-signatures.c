@@ -66,10 +66,10 @@ static void ev_sidebar_signatures_dispose              (GObject                 
 // -------------------------------------------------------------------------------------- define my functions
 
 static void ev_sidebar_signatures_tree_add_sign_info   (GtkTreeStore               *model,
-gchar         *signer,
-gboolean      is_valid_do,
-gboolean      is_id_known,
-GTime         sign_date);
+                                                        gchar                      *signer_name,
+                                                        gboolean                    is_valid_do,
+                                                        gboolean                    is_id_known,
+                                                        gchar                      *sign_time);
 
 
 static void job_finished_callback                      (EvJobSignatures            *job,
@@ -122,27 +122,27 @@ job_finished_callback (EvJobSignatures *job, EvSidebarSignatures *sidebar)
   GList *l;
   GtkTreeStore *model = sidebar->priv->model;
 
-  gchar *signer;
+  gchar *signer_name;
   gboolean is_doc_valid;
   gboolean is_id_known;
-  GTime sign_date;
+  gchar *sign_time;
 
 	for (l = job->signatures; l && l->data; l = g_list_next (l)) {
     EvSignature *signature = EV_SIGNATURE (l->data);
     
     g_object_get (G_OBJECT (signature),
-                  "name", &signer,
+                  "signer-name", &signer_name,
                   "is-doc-valid", &is_doc_valid,
                   "is-id-known", &is_id_known,
-                  "sign-date", &sign_date,
+                  "sign-time", &sign_time,
                   NULL);
 
-//    ev_sidebar_signatures_tree_add_sign_info (model, signer, is_doc_valid, is_id_known, sign_date);
-/*
-    g_print("ev-sidebar-signatures::---- signer: %s\n", signer);
+    ev_sidebar_signatures_tree_add_sign_info (model, signer_name, is_doc_valid, is_id_known, sign_time);
+
+    /*g_print("ev-sidebar-signatures::---- signer: %s\n", signer_name);
     g_print("ev-sidebar-signatures::---- valid: %d\n", is_doc_valid);
     g_print("ev-sidebar-signatures::---- known: %d\n", is_id_known);
-    g_print("ev-sidebar-signatures::---- date: %d\n", sign_date);
+    g_print("ev-sidebar-signatures::---- time: %s\n", sign_time);
     g_print("----------------\n"); */
   }
 }
@@ -222,8 +222,8 @@ ev_sidebar_signatures_init (EvSidebarSignatures *ev_sign)
   priv->tree_view = gtk_tree_view_new ();
   GtkTreeViewColumn *col = gtk_tree_view_column_new ();
   GtkCellRenderer *renderer = gtk_cell_renderer_text_new ();
-  
-  
+ 
+  // create model
   priv->model = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING);
 
   // make the associations for it to show something
@@ -294,10 +294,10 @@ ev_sidebar_signatures_dispose (GObject *object)
 
 static void
 ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model, 
-                                          gchar         *signer,
+                                          gchar         *signer_name,
                                           gboolean      is_valid_doc,
                                           gboolean      is_id_known,
-                                          GTime         sign_date)
+                                          gchar         *sign_time)
 {
   g_print("ev_sidebar_signatures_tree_add_info\n");
   GtkTreeIter parent;
@@ -305,15 +305,17 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
 
   // create the 1st level node with the signature name
   gtk_tree_store_append (model, &parent, NULL);
-  gtk_tree_store_set (model, &parent, COL_SIGN_INFO, "signer_name", -1);
+  gtk_tree_store_set (model, &parent, COL_SIGN_INFO, signer_name, -1);
 
   // append the remaining information about the signature as child nodes
   gtk_tree_store_append (model, &child, &parent);
-  gtk_tree_store_set (model, &parent, COL_SIGN_INFO, "is_valid_doc", -1);
+  const gchar *doc_valid = is_valid_doc ? "Document is valid" : "Document is invalid";
+  gtk_tree_store_set (model, &child, COL_SIGN_INFO, doc_valid, -1);
   
   gtk_tree_store_append (model, &child, &parent);
-  gtk_tree_store_set (model, &child, COL_SIGN_INFO, "is_id_known", -1);
+  const gchar *id_known = is_id_known ? "Signer is known" : "Signer is unknown";
+  gtk_tree_store_set (model, &child, COL_SIGN_INFO, id_known, -1);
   
   gtk_tree_store_append (model, &child, &parent);
-  gtk_tree_store_set (model, &child, COL_SIGN_INFO, "sign_date", -1);
+  gtk_tree_store_set (model, &child, COL_SIGN_INFO, sign_time, -1);
 }
