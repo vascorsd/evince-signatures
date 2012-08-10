@@ -3323,23 +3323,35 @@ pdf_document_signatures_has_signatures (EvDocumentSignatures *document)
 {
   PdfDocument *pdf_document = PDF_DOCUMENT (document);
 
-	return poppler_document_is_signed (pdf_document->document);
+	return (poppler_document_is_signed (pdf_document->document) > 0);
 }
 
 static GList *
 pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
 {
-  GList *ret_list = NULL;
+	PdfDocument *pdf_document = PDF_DOCUMENT (document);
+	GList *ret_list = NULL;
+	EvSignature *signature;
 
-  // real code getting info from poppler should go here.
-  // for now just some dummy data to test the gui.
-  EvSignature *sign1 = ev_signature_new ("Cp. Barbosa", TRUE, FALSE, "15:30 pm");
-  EvSignature *sign2 = ev_signature_new ("Mr. Bond", FALSE, TRUE, "timeee");
-  EvSignature *sign3 = ev_signature_new ("Goodman SA", TRUE, TRUE, "offsure 3pm");
+	int validation;
+	gchar *signer_name;
+	gchar *sign_time;
 
-  ret_list = g_list_append (ret_list, sign1);
-  ret_list = g_list_append (ret_list, sign2);
-  ret_list = g_list_append (ret_list, sign3);
+	// call validate method
+	validation = poppler_document_validate_signature (pdf_document->document);
+	g_print ("validation: %d\n", validation);
+
+	// for each signature found get the info:
+	// name, time
+	signer_name = poppler_document_signature_get_signername (pdf_document->document, 0);
+	sign_time = poppler_document_signature_get_time (pdf_document->document, 0);
+ 
+  signature = ev_signature_new (signer_name, TRUE, FALSE, sign_time);
+  ret_list = g_list_append (ret_list, signature);
+ 
+  // still one with dummy info
+  signature = ev_signature_new ("Mr. Bond", FALSE, TRUE, "timeee");
+  ret_list = g_list_append (ret_list, signature);
 
   return ret_list;
 }
