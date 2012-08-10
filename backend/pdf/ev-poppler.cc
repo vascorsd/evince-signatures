@@ -3321,7 +3321,9 @@ pdf_document_document_layers_iface_init (EvDocumentLayersInterface *iface)
 static gboolean
 pdf_document_signatures_has_signatures (EvDocumentSignatures *document)
 {
-  return TRUE;
+  PdfDocument *pdf_document = PDF_DOCUMENT (document);
+
+	return poppler_document_is_signed (pdf_document->document);
 }
 
 static GList *
