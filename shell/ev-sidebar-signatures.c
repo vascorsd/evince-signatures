@@ -103,7 +103,7 @@ static gboolean
 ev_sidebar_signatures_support_document (EvSidebarPage   *sidebar_page,
                                         EvDocument      *document)
 {
-  g_print("ev_sidebar_signatures_support_document\n");
+  //g_print("ev_sidebar_signatures_support_document\n");
   return (EV_IS_DOCUMENT_SIGNATURES (document) &&
           ev_document_signatures_has_signatures (EV_DOCUMENT_SIGNATURES (document)));
 }
@@ -111,14 +111,14 @@ ev_sidebar_signatures_support_document (EvSidebarPage   *sidebar_page,
 static const gchar *
 ev_sidebar_signatures_get_label (EvSidebarPage *sidebar_page)
 {
-  g_print("ev_sidebar_signatures_get_label\n");
+  //g_print("ev_sidebar_signatures_get_label\n");
   return _("Signatures");
 }
 
 static void
 job_finished_callback (EvJobSignatures *job, EvSidebarSignatures *sidebar)
 {
-  g_print("job_finished_callback\n");
+  //g_print("job_finished_callback\n");
   GList *l;
   GtkTreeStore *model = sidebar->priv->model;
 
@@ -154,7 +154,7 @@ ev_sidebar_signatures_document_changed_cb (EvDocumentModel     *model,
                                            GParamSpec          *pspec,
                                            EvSidebarSignatures *sidebar_sign)
 {
-  g_print("ev_sidebar_signatures_document_changed_cb\n");
+  //g_print("ev_sidebar_signatures_document_changed_cb\n");
   EvDocument *document = ev_document_model_get_document (model);
   EvJob *job = ev_job_signatures_new (document);
  
@@ -176,7 +176,7 @@ static void
 ev_sidebar_signatures_set_model (EvSidebarPage   *sidebar_page,
                                  EvDocumentModel *model)
 {
-  g_print("ev_sidebar_signatures_set_model\n");
+  //g_print("ev_sidebar_signatures_set_model\n");
   
   g_signal_connect (model, "notify::document",
         G_CALLBACK (ev_sidebar_signatures_document_changed_cb),
@@ -205,7 +205,7 @@ ev_sidebar_signatures_new (void)
 static void
 ev_sidebar_signatures_init (EvSidebarSignatures *ev_sign)
 {
-  g_print("ev_sidebar_signatures_init\n");
+  //g_print("ev_sidebar_signatures_init\n");
   EvSidebarSignaturesPrivate *priv;
           
   // initialize the private structure that holds everything we need
@@ -301,7 +301,7 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
                                           gboolean      is_id_known,
                                           gchar         *sign_time)
 {
-  g_print("ev_sidebar_signatures_tree_add_info\n");
+  //g_print("ev_sidebar_signatures_tree_add_info\n");
   GtkTreeIter parent;
   GtkTreeIter child;
 
@@ -311,11 +311,11 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
 
   // append the remaining information about the signature as child nodes
   gtk_tree_store_append (model, &child, &parent);
-  const gchar *doc_valid = is_valid_doc ? "Document is valid" : "Document is invalid";
+  const gchar *doc_valid = is_valid_doc ? _("Document is valid") : _("Document is invalid");
   gtk_tree_store_set (model, &child, COL_SIGN_INFO, doc_valid, -1);
   
   gtk_tree_store_append (model, &child, &parent);
-  const gchar *id_known = is_id_known ? "Signer is known" : "Signer is unknown";
+  const gchar *id_known = is_id_known ? _("Signer is known") : _("Signer is unknown");
   gtk_tree_store_set (model, &child, COL_SIGN_INFO, id_known, -1);
   
   gtk_tree_store_append (model, &child, &parent);
