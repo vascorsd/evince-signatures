@@ -3331,9 +3331,9 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
 
   // real code getting info from poppler should go here.
   // for now just some dummy data to test the gui.
-  EvSignature *sign1 = ev_signature_new ("Cp. Barbosa", TRUE, FALSE, 30000);
-  EvSignature *sign2 = ev_signature_new ("Mr. Bond", FALSE, TRUE, 10);
-  EvSignature *sign3 = ev_signature_new ("Goodman SA", TRUE, TRUE, 50000);
+  EvSignature *sign1 = ev_signature_new ("Cp. Barbosa", TRUE, FALSE, "15:30 pm");
+  EvSignature *sign2 = ev_signature_new ("Mr. Bond", FALSE, TRUE, "timeee");
+  EvSignature *sign3 = ev_signature_new ("Goodman SA", TRUE, TRUE, "offsure 3pm");
 
   ret_list = g_list_append (ret_list, sign1);
   ret_list = g_list_append (ret_list, sign2);
