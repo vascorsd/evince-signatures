@@ -112,6 +112,7 @@ struct _PdfDocument
 	PdfPrintContext *print_ctx;
 
 	GHashTable *annots;
+	gint n_signatures;
 };
 
 static void pdf_document_security_iface_init             (EvDocumentSecurityInterface    *iface);
@@ -3323,7 +3324,9 @@ pdf_document_signatures_has_signatures (EvDocumentSignatures *document)
 {
   PdfDocument *pdf_document = PDF_DOCUMENT (document);
 
-	return (poppler_document_is_signed (pdf_document->document) > 0);
+  pdf_document->n_signatures = poppler_document_is_signed (pdf_document->document);
+
+	return (pdf_document->n_signatures > 0);
 }
 
 static GList *
@@ -3336,6 +3339,7 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
 	int validation;
 	gchar *signer_name;
 	gchar *sign_time;
+  int i;
 
 	// call validate method
 	validation = poppler_document_validate_signature (pdf_document->document);
@@ -3343,16 +3347,16 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
 
 	// for each signature found get the info:
 	// name, time
-	signer_name = poppler_document_signature_get_signername (pdf_document->document, 0);
-	sign_time = poppler_document_signature_get_time (pdf_document->document, 0);
- 
-  signature = ev_signature_new (signer_name, TRUE, FALSE, sign_time);
-  ret_list = g_list_append (ret_list, signature);
- 
-  // still one with dummy info
-  signature = ev_signature_new ("Mr. Bond", FALSE, TRUE, "timeee");
-  ret_list = g_list_append (ret_list, signature);
-
+	for (i = 0; i < pdf_document->n_signatures; i++) {
+    signer_name = poppler_document_signature_get_signername (pdf_document->document, i);
+    sign_time = poppler_document_signature_get_time (pdf_document->document, i);
+  
+    // based on the validation code we know if the document is corrupted or not.
+    // regarding the information about "is the person trusted?" it needs more thinking
+    signature = ev_signature_new (signer_name, TRUE, FALSE, sign_time);
+    ret_list = g_list_append (ret_list, signature);
+  } 
+  
   return ret_list;
 }
 
