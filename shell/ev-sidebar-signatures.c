@@ -42,7 +42,8 @@ enum {
 
 enum {
   COL_ICON,
-  COL_SIGN_INFO,
+  COL_HAS_ICON,
+  COL_SIGN_TEXT,
   N_COLUMNS
 };
 
@@ -78,6 +79,12 @@ static void job_finished_callback                      (EvJobSignatures         
 static void ev_sidebar_signatures_document_changed_cb  (EvDocumentModel            *model,
                                                         GParamSpec                 *pspec,
                                                         EvSidebarSignatures        *sidebar_sign);
+
+static void render_icon_func                           (GtkTreeViewColumn          *column,
+                                                        GtkCellRenderer            *renderer,
+                                                        GtkTreeModel               *model,
+                                                        GtkTreeIter                *iter,
+                                                        gpointer                    user_data);
 
 // --------------------------------------------------------------- set this object to implement the interface
 G_DEFINE_TYPE_EXTENDED (EvSidebarSignatures,
@@ -200,20 +207,19 @@ ev_sidebar_signatures_init (EvSidebarSignatures *ev_sign)
   GtkCellRenderer *renderer = gtk_cell_renderer_text_new ();
   GtkCellRenderer *icon_renderer = gtk_cell_renderer_pixbuf_new (); 
 
-// GTK_STOCK_OK
-// GTK_STOCK_STOP / GTK_STOCK_NO / GTK_STOCK_DIALOG_WARNING
 
   // create model
-  priv->model = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
+  priv->model = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING);
 
   // make the associations for it to show something
   gtk_tree_view_append_column (GTK_TREE_VIEW (priv->tree_view), col);
 
   gtk_tree_view_column_pack_start (col, icon_renderer, FALSE);
   gtk_tree_view_column_add_attribute (col, icon_renderer, "stock-id", COL_ICON);
+  gtk_tree_view_column_set_cell_data_func (col, icon_renderer, render_icon_func, NULL, NULL);
 
   gtk_tree_view_column_pack_start (col, renderer, TRUE);
-  gtk_tree_view_column_add_attribute (col, renderer, "text", COL_SIGN_INFO);
+  gtk_tree_view_column_add_attribute (col, renderer, "text", COL_SIGN_TEXT);
   
   // associate the model to the view
   gtk_tree_view_set_model (GTK_TREE_VIEW (priv->tree_view), GTK_TREE_MODEL (priv->model));
@@ -287,6 +293,19 @@ ev_sidebar_signatures_dispose (GObject *object)
 }
 
 // ----------------------------------------------------------------------------------- And my functions
+static void
+render_icon_func (GtkTreeViewColumn *column,
+                  GtkCellRenderer   *renderer,
+                  GtkTreeModel      *model,
+                  GtkTreeIter       *iter,
+                  gpointer          user_data)
+{
+  gboolean show_icon;
+
+  gtk_tree_model_get (model, iter, COL_HAS_ICON, &show_icon, -1);
+
+  gtk_cell_renderer_set_visible (renderer, show_icon);
+}
 
 static void
 ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model, 
@@ -300,25 +319,30 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
 
   // create the 1st level node with the signature name
   gtk_tree_store_append (model, &parent, NULL);
-  gtk_tree_store_set (model, &parent, COL_SIGN_INFO, signer_name, 
-                                      COL_ICON, "gtk-stock-ok",
+  // GTK_STOCK_STOP / GTK_STOCK_NO / GTK_STOCK_DIALOG_WARNING
+  // choose icon based on valid info
+  // ...
+  gtk_tree_store_set (model, &parent, COL_SIGN_TEXT, signer_name, 
+                                      COL_ICON, GTK_STOCK_OK,
+                                      COL_HAS_ICON, TRUE,
                                       -1);
 
   // append the remaining information about the signature as child nodes
   gtk_tree_store_append (model, &child, &parent);
   const gchar *doc_valid = is_valid_doc ? _("Document is valid") : _("Document is invalid");
-  gtk_tree_store_set (model, &child, COL_SIGN_INFO, doc_valid, 
-                                     COL_ICON, "gtk-stock-ok",
+  gtk_tree_store_set (model, &child, COL_SIGN_TEXT, doc_valid, 
+                                     COL_HAS_ICON, FALSE,
                                      -1);
   
   gtk_tree_store_append (model, &child, &parent);
   const gchar *id_known = is_id_known ? _("Signer is known") : _("Signer is unknown");
-  gtk_tree_store_set (model, &child, COL_SIGN_INFO, id_known, 
-                                     COL_ICON, "GTK-STOCK_STOP",
+  gtk_tree_store_set (model, &child, COL_SIGN_TEXT, id_known, 
+                                     COL_HAS_ICON, FALSE,
                                      -1);
   
   gtk_tree_store_append (model, &child, &parent);
-  gtk_tree_store_set (model, &child, COL_SIGN_INFO, sign_time, 
-                                     COL_ICON, "2",
+  const gchar *time_text = sign_time ? sign_time : _("Time not available");
+  gtk_tree_store_set (model, &child, COL_SIGN_TEXT, time_text, 
+                                     COL_HAS_ICON, FALSE,
                                      -1);
 }
