@@ -43,6 +43,7 @@ enum {
   COL_ICON,
   COL_HAS_ICON,
   COL_SIGN_TEXT,
+  COL_MAKE_BOLD,
   N_COLUMNS
 };
 
@@ -80,6 +81,12 @@ static void ev_sidebar_signatures_document_changed_cb  (EvDocumentModel         
                                                         EvSidebarSignatures        *sidebar_sign);
 
 static void render_icon_func                           (GtkTreeViewColumn          *column,
+                                                        GtkCellRenderer            *renderer,
+                                                        GtkTreeModel               *model,
+                                                        GtkTreeIter                *iter,
+                                                        gpointer                    user_data);
+
+static void render_bold_func                           (GtkTreeViewColumn          *column,
                                                         GtkCellRenderer            *renderer,
                                                         GtkTreeModel               *model,
                                                         GtkTreeIter                *iter,
@@ -209,7 +216,8 @@ ev_sidebar_signatures_init (EvSidebarSignatures *ev_sign)
 
 
   // create model
-  priv->model = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_BOOLEAN, G_TYPE_STRING);
+  priv->model = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_BOOLEAN, 
+                                    G_TYPE_STRING, G_TYPE_BOOLEAN);
 
   // make the associations for it to show something
   gtk_tree_view_append_column (GTK_TREE_VIEW (priv->tree_view), col);
@@ -218,13 +226,13 @@ ev_sidebar_signatures_init (EvSidebarSignatures *ev_sign)
   gtk_tree_view_column_add_attribute (col, icon_renderer, "stock-id", COL_ICON);
 
   // we use a custom render function to select per row if we need to
-  // show the icon or not. We pass the text render to also change to bold
-  // on the same condition
-  gtk_tree_view_column_set_cell_data_func (col, icon_renderer, render_icon_func, renderer, NULL);
+  // show the icon or not.
+  gtk_tree_view_column_set_cell_data_func (col, icon_renderer, render_icon_func, NULL, NULL);
 
   gtk_tree_view_column_pack_start (col, renderer, TRUE);
   gtk_tree_view_column_add_attribute (col, renderer, "text", COL_SIGN_TEXT);
-  
+  gtk_tree_view_column_set_cell_data_func (col, renderer, render_bold_func, NULL, NULL);
+
   // associate the model to the view
   gtk_tree_view_set_model (GTK_TREE_VIEW (priv->tree_view), GTK_TREE_MODEL (priv->model));
 
@@ -294,20 +302,34 @@ render_icon_func (GtkTreeViewColumn *column,
                   GtkTreeIter       *iter,
                   gpointer          user_data)
 {
-  GtkCellRendererText *text_renderer = GTK_CELL_RENDERER_TEXT (user_data);
   gboolean show_icon;
 
   gtk_tree_model_get (model, iter, COL_HAS_ICON, &show_icon, -1);
 
-  if (show_icon) {
-    gtk_cell_renderer_set_visible (icon_renderer, show_icon);
+  gtk_cell_renderer_set_visible (icon_renderer, show_icon);
+}
 
-    g_object_set (text_renderer, "weight", PANGO_WEIGHT_BOLD,
-                                 "weight-set", TRUE,
-                                 NULL);
-  } else {
-    g_object_set (text_renderer, "weight-set", FALSE, NULL);
-  }
+static void
+render_bold_func (GtkTreeViewColumn *column,
+                  GtkCellRenderer   *text_renderer,
+                  GtkTreeModel      *model,
+                  GtkTreeIter       *iter,
+                  gpointer          user_data)
+{
+  gboolean make_bold;
+
+  gtk_tree_model_get (model, iter, COL_MAKE_BOLD, &make_bold, -1);
+
+  if (make_bold)
+    {
+      g_object_set (text_renderer, "weight", PANGO_WEIGHT_BOLD,
+                                   "weight-set", TRUE,
+                                   NULL);
+    }
+  else
+    {
+      g_object_set (text_renderer, "weight-set", FALSE, NULL);
+    }
 }
 
 static void
@@ -324,30 +346,56 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
   // do some logic to know from the returned values if
   // the signature is valid or not and what the problem is.
   gboolean is_sign_ok = (is_valid_doc && is_id_known);
-  gchar *icon = is_sign_ok ? GTK_STOCK_OK : GTK_STOCK_DIALOG_WARNING;
 
-  const gchar *status = is_sign_ok ? _("Signature is valid.") : _("Signature has problems");
+  const gchar *status;
+  const gchar *sign_ok_icon;
+  if (is_sign_ok)
+    {
+      status = _("Signature is valid");
+      sign_ok_icon = GTK_STOCK_OK;
+    }
+  else
+    {
+      status = _("Signature has problems");
+      sign_ok_icon = GTK_STOCK_DIALOG_WARNING;
+    }
 
   const gchar *doc_valid;
+  const gchar *doc_valid_icon;
   if (is_valid_doc)
-    doc_valid = _("Document has not  been modified since the signature was applied");
+    {
+      doc_valid = _("Document has not  been modified since the signature was applied");
+      doc_valid_icon = GTK_STOCK_OK;
+    }
   else
-    doc_valid = _("Document was changed since the signature was applied");
+    {
+      doc_valid = _("Document was changed since the signature was applied");
+      doc_valid_icon = GTK_STOCK_NO;
+    }
 
   const gchar *id_known;
+  const gchar *id_known_icon;
   if (is_id_known)
-    id_known = _("Signer's identity is known");
+    {
+      id_known = _("Signer's identity is known");
+      id_known_icon = GTK_STOCK_OK;
+    }
   else
-    id_known = _("Signer's identity is unknown");
-
+    {
+      id_known = _("Signer's identity is unknown");
+      id_known_icon = GTK_STOCK_NO;
+    }
+  
   const gchar *time_text = sign_time ? sign_time : _("Time not available");
+  // do we have enough info about the time to show an icon ?
 
   // create the 1st level node with the signature name
   gtk_tree_store_append (model, &parent, NULL);
   gchar *signed_by = g_strdup_printf (_("Signed by: %s"), signer_name);
   gtk_tree_store_set (model, &parent, COL_SIGN_TEXT, signed_by, 
-                                      COL_ICON, icon,
+                                      COL_ICON, sign_ok_icon,
                                       COL_HAS_ICON, TRUE,
+                                      COL_MAKE_BOLD, TRUE,
                                       -1);
   g_free (signed_by);
 
@@ -355,21 +403,27 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
   gtk_tree_store_append (model, &conclusion, &parent);
   gtk_tree_store_set (model, &conclusion, COL_SIGN_TEXT, status,
                                           COL_HAS_ICON, FALSE,
+                                          COL_MAKE_BOLD, FALSE,
                                           -1);
 
   // append the remaining information about the signature as child nodes
   gtk_tree_store_append (model, &details, &conclusion);
   gtk_tree_store_set (model, &details, COL_SIGN_TEXT, doc_valid, 
-                                       COL_HAS_ICON, FALSE,
+                                       COL_HAS_ICON, TRUE,
+                                       COL_ICON, doc_valid_icon,
+                                       COL_MAKE_BOLD, FALSE,
                                        -1);
   
   gtk_tree_store_append (model, &details, &conclusion);
   gtk_tree_store_set (model, &details, COL_SIGN_TEXT, id_known, 
-                                       COL_HAS_ICON, FALSE,
+                                       COL_HAS_ICON, TRUE,
+                                       COL_ICON, id_known_icon,
+                                       COL_MAKE_BOLD, FALSE,
                                        -1);
   
   gtk_tree_store_append (model, &details, &conclusion);
   gtk_tree_store_set (model, &details, COL_SIGN_TEXT, time_text, 
                                        COL_HAS_ICON, FALSE,
+                                       COL_MAKE_BOLD, FALSE,
                                        -1);
 }
