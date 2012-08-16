@@ -332,6 +332,44 @@ render_bold_func (GtkTreeViewColumn *column,
     }
 }
 
+// copied from properties/ev-properties-view.c
+static gchar *
+make_valid_utf8 (const gchar *name)
+{
+  GString *string;
+  const gchar *remainder, *invalid;
+  gint remaining_bytes, valid_bytes;
+  
+  string = NULL;
+  remainder = name;
+  remaining_bytes = strlen (name);
+  
+  while (remaining_bytes != 0) 
+    {
+      if (g_utf8_validate (remainder, remaining_bytes, &invalid)) 
+	break;
+      valid_bytes = invalid - remainder;
+    
+      if (string == NULL) 
+	string = g_string_sized_new (remaining_bytes);
+
+      g_string_append_len (string, remainder, valid_bytes);
+      g_string_append_c (string, '?');
+      
+      remaining_bytes -= valid_bytes + 1;
+      remainder = invalid + 1;
+    }
+  
+  if (string == NULL)
+    return g_strdup (name);
+  
+  g_string_append (string, remainder);
+
+  g_assert (g_utf8_validate (string->str, -1, NULL));
+  
+  return g_string_free (string, FALSE);
+}
+
 static void
 ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model, 
                                           gchar         *signer_name,
@@ -387,6 +425,8 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
     }
   
   const gchar *time_text = sign_time ? sign_time : _("Time not available");
+  const gchar *valid_time_text = make_valid_utf8 (time_text);
+
   // do we have enough info about the time to show an icon ?
 
   // create the 1st level node with the signature name
@@ -422,7 +462,7 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
                                        -1);
   
   gtk_tree_store_append (model, &details, &conclusion);
-  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, time_text, 
+  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, valid_time_text, 
                                        COL_HAS_ICON, FALSE,
                                        COL_MAKE_BOLD, FALSE,
                                        -1);
