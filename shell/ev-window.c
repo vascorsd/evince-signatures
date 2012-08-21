@@ -374,7 +374,8 @@ static void	ev_window_emit_closed			(EvWindow         *window);
 static void 	ev_window_emit_doc_loaded		(EvWindow	  *window);
 #endif
 static void     ev_window_setup_bookmarks               (EvWindow         *window);
-
+static void ev_window_sidebar_set_current_page          (EvWindow         *window,
+                                             	 			     const gchar      *page_id);
 static gchar *nautilus_sendto = NULL;
 
 G_DEFINE_TYPE (EvWindow, ev_window, GTK_TYPE_APPLICATION_WINDOW)
@@ -770,6 +771,12 @@ ev_window_message_area_response_cb (EvMessageArea *area,
 				    gint           response_id,
 				    EvWindow      *window)
 {
+  // show the signatures tab, force sidebar to show
+  ev_window_sidebar_set_current_page (window, SIGNATURES_SIDEBAR_ID);
+	update_chrome_flag (window, EV_CHROME_SIDEBAR, TRUE);
+	update_chrome_visibility (window);
+
+  // remove the message from the gui
 	ev_window_set_message_area (window, NULL);
 }
 
@@ -1541,6 +1548,10 @@ ev_window_set_document (EvWindow *ev_window, EvDocument *document)
 	ev_window_update_max_min_scale (ev_window);
 
 	ev_window_set_message_area (ev_window, NULL);
+
+  //test
+  ev_window_warning_message (ev_window, "%s", _("oláaaaaaaa"));
+  //if (EV_IS_DOCUMENT_SIGNATURES (document) 
 
 	if (ev_document_get_n_pages (document) <= 0) {
 		ev_window_warning_message (ev_window, "%s",
