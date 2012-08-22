@@ -57,6 +57,7 @@
 #include "ev-document-images.h"
 #include "ev-document-links.h"
 #include "ev-document-annotations.h"
+#include "ev-document-signatures.h"
 #include "ev-document-type-builtins.h"
 #include "ev-document-misc.h"
 #include "ev-file-exporter.h"
@@ -771,13 +772,23 @@ ev_window_message_area_response_cb (EvMessageArea *area,
 				    gint           response_id,
 				    EvWindow      *window)
 {
-  // show the signatures tab, force sidebar to show
-  ev_window_sidebar_set_current_page (window, SIGNATURES_SIDEBAR_ID);
-	update_chrome_flag (window, EV_CHROME_SIDEBAR, TRUE);
-	update_chrome_visibility (window);
-
-  // remove the message from the gui
 	ev_window_set_message_area (window, NULL);
+}
+
+static void
+ev_window_show_signatures_sidebar (EvMessageArea *area,
+                                   gint           response_id,
+                                   EvWindow      *window)
+{
+  // force the sidebar to show and open the signatures
+  // panel
+  ev_window_sidebar_set_current_page (window, SIGNATURES_SIDEBAR_ID);
+  update_chrome_flag (window, EV_CHROME_SIDEBAR, TRUE);
+  update_chrome_visibility (window);
+
+  // after showing the sidebar we can remove the message
+  // from the window
+  ev_window_set_message_area (window, NULL);
 }
 
 static void
@@ -847,6 +858,36 @@ typedef struct _PageTitleData {
 	const gchar *page_label;
 	gchar       *page_title;
 } PageTitleData;
+
+static void
+ev_window_info_message (EvWindow    *window,
+			   const gchar *format,
+			   ...)
+{
+	GtkWidget *area;
+	va_list    args;
+	gchar     *msg = NULL;
+
+	if (window->priv->message_area)
+		return;
+
+	va_start (args, format);
+	msg = g_strdup_vprintf (format, args);
+	va_end (args);
+
+	area = ev_message_area_new (GTK_MESSAGE_INFO,
+				    msg,
+				    _("See detailed information..."),
+				    GTK_RESPONSE_NONE,
+				    NULL);
+	g_free (msg);
+	
+	g_signal_connect (area, "response",
+			  G_CALLBACK (ev_window_show_signatures_sidebar),
+			  window);
+	gtk_widget_show (area);
+	ev_window_set_message_area (window, area);
+}
 
 static gboolean
 ev_window_find_page_title (GtkTreeModel  *tree_model,
@@ -1549,9 +1590,13 @@ ev_window_set_document (EvWindow *ev_window, EvDocument *document)
 
 	ev_window_set_message_area (ev_window, NULL);
 
-  //test
-  ev_window_warning_message (ev_window, "%s", _("oláaaaaaaa"));
-  //if (EV_IS_DOCUMENT_SIGNATURES (document) 
+  // if the document contains signatures show the top info message
+  // so the user can quickly see this information
+  if (EV_IS_DOCUMENT_SIGNATURES (document) &&
+      ev_document_signatures_has_signatures  (EV_DOCUMENT_SIGNATURES (document))) {
+    ev_window_info_message (ev_window, "%s",
+      _("This document is signed, you should review the available information."));
+  }
 
 	if (ev_document_get_n_pages (document) <= 0) {
 		ev_window_warning_message (ev_window, "%s",
