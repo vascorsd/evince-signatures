@@ -3323,12 +3323,96 @@ static gboolean
 pdf_document_signatures_has_signatures (EvDocumentSignatures *document)
 {
   PdfDocument *pdf_document = PDF_DOCUMENT (document);
+  gboolean can_validate;
 
   pdf_document->n_signatures = poppler_document_is_signed (pdf_document->document);
+  //can_validate = popler_document_can_validate (pdf_document->document);
 
 	return (pdf_document->n_signatures > 0);
+	//return ((pdf_document->n_signatures > 0) && can_validate); 
 }
 
+/*
+static GList *
+pdf_document_signatures_get_signatures_future (EvDocumentSignatures *document)
+{
+  PdfDocument *pdf_document = PDF_DOCUMENT (document);
+  GList *ret_list = NULL;
+  EvSignature *signature;
+
+  gchar *signer_name;
+  gchar *sign_time;
+  int sign_status;
+  gboolean sign_valid = TRUE; // assume TRUE and change
+  gboolean sign_known = TRUE; // according to the validate codes
+
+  int i;
+  // get the information related to each signature
+  for (i = 0; i < pdf_document->n_signatures; i++) {
+    signer_name = poppler_document_signature_get_signername (pdf_document->document, i);
+    sign_time = poppler_document_signature_get_time (pdf_document->document, i);
+    validation = poppler_document_signature_validate (pdf_document->document, i;
+
+    switch (validation)
+      {
+        case POPPLER_SIGNATURE_VALID:
+          g_print ("ev-poppler: sign valid\n");
+          break;
+        case POPPLER_SIGNATURE_UNTRUSTED:
+          g_print ("ev-poppler: sign untrusted user\n");
+          signer_known = FALSE;
+          break;
+        case POPPLER_SIGNATURE_INVALID:
+          g_print ("ev-poppler: sign invalid\n");
+          sign_valid = FALSE;
+          break;
+        case POPPLER_SIGNATURE_INVALID_UNTRUSTED:
+          g_print ("ev-poppler: sign invalid\n");
+          sign_valid = FALSE;
+          signer_known = FALSE;
+          break;
+        case POPPLER_SIGNATURE_GENERIC_ERROR:
+          g_print ("ev-poppler: sign generic error\n");
+          // skip this signature, we can't get any mor info
+          continue;
+      }
+    
+      signature = ev_signature_new (signer_name, sign_valid, signer_known, sign_time);
+      ret_list = g_list_append (ret_list, signature);
+  }
+
+  return ret_list;
+}
+*/
+
+// quick and dirty, to test without caring about poppler
+static GList *
+pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
+{
+	PdfDocument *pdf_document = PDF_DOCUMENT (document);
+	GList *ret_list = NULL;
+	EvSignature *signature;
+
+  // everything fine
+  signature = ev_signature_new ("Tobias the man", TRUE, TRUE, "Yesterday");
+  ret_list = g_list_append (ret_list, signature);
+
+  // just untrusted
+  signature = ev_signature_new ("Gervasio Constantino", TRUE, FALSE, "Tomorrow");
+  ret_list = g_list_append (ret_list, signature);
+
+  // just hash nok
+  signature = ev_signature_new ("Helena Sparta", FALSE, TRUE, "2nd century");
+  ret_list = g_list_append (ret_list, signature);
+  
+  // everything bad
+  signature = ev_signature_new ("Lover's Inc", FALSE, FALSE, "1444 BC");
+  ret_list = g_list_append (ret_list, signature);
+
+  return ret_list;
+}
+
+/*
 static GList *
 pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
 {
@@ -3381,6 +3465,7 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
   
   return ret_list;
 }
+*/
 
 static void
 pdf_document_document_signatures_iface_init (EvDocumentSignaturesInterface *iface)

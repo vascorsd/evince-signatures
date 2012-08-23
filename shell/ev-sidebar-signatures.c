@@ -383,14 +383,17 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
   
   // do some logic to know from the returned values if
   // the signature is valid or not and what the problem is.
-  gboolean is_sign_ok = (is_valid_doc && is_id_known);
-
   const gchar *status;
   const gchar *sign_ok_icon;
-  if (is_sign_ok)
+  if (is_valid_doc && is_id_known)
     {
       status = _("Signature is valid");
       sign_ok_icon = GTK_STOCK_OK;
+    }
+  else if (!is_valid_doc)
+    {
+      status = _("Signature is invalid");
+      sign_ok_icon = GTK_STOCK_STOP;
     }
   else
     {
