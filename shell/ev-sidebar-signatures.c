@@ -381,56 +381,65 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
   GtkTreeIter conclusion;
   GtkTreeIter details;
   
-  // do some logic to know from the returned values if
-  // the signature is valid or not and what the problem is.
-  const gchar *status;
+  const gchar *status_text;
   const gchar *sign_ok_icon;
-  if (is_valid_doc && is_id_known)
-    {
-      status = _("Signature is valid");
-      sign_ok_icon = GTK_STOCK_OK;
-    }
-  else if (!is_valid_doc)
-    {
-      status = _("Signature is invalid");
-      sign_ok_icon = GTK_STOCK_STOP;
-    }
-  else
-    {
-      status = _("Signature has problems");
-      sign_ok_icon = GTK_STOCK_DIALOG_WARNING;
-    }
 
-  const gchar *doc_valid;
+  const gchar *doc_valid_text;
   const gchar *doc_valid_icon;
-  if (is_valid_doc)
+
+  const gchar *id_known_text;
+  const gchar *id_known_icon;
+
+  // do some logic to know from the returned values if
+  // the signature is valid or not and what the problem is:
+  //  * both verifications are TRUE, everything is fine
+  //    (common case 1)
+  //  * doc is good but signer is unknown
+  //    (common case 2)
+  //  * when document fails verification poppler won't
+  //    even care to know if signer is known
+  if (is_valid_doc) 
     {
-      doc_valid = _("Document has not  been modified since the signature was applied");
+      doc_valid_text = _("Document has not  been modified since the signature was applied");
       doc_valid_icon = GTK_STOCK_OK;
     }
-  else
+  else 
     {
-      doc_valid = _("Document was changed since the signature was applied");
+      doc_valid_text = _("Document was changed since the signature was applied");
       doc_valid_icon = GTK_STOCK_NO;
     }
 
-  const gchar *id_known;
-  const gchar *id_known_icon;
-  if (is_id_known)
+  if (is_valid_doc && is_id_known)
     {
-      id_known = _("Signer's identity is known");
+      status_text = _("Signature is valid");
+      sign_ok_icon = GTK_STOCK_OK;
+
+      id_known_text = _("Signer's identity is known");
       id_known_icon = GTK_STOCK_OK;
+    }
+  else if (is_valid_doc && !is_id_known)
+    {
+      status_text = _("Signature has problems");
+      sign_ok_icon = GTK_STOCK_DIALOG_WARNING;
+
+      id_known_text = _("Signer's identity is unknown");
+      id_known_icon = GTK_STOCK_NO;
     }
   else
     {
-      id_known = _("Signer's identity is unknown");
+      status_text = _("Signature is invalid");
+      sign_ok_icon = GTK_STOCK_STOP;
+
+      id_known_text = _("Signer's identity wasn't checked");
       id_known_icon = GTK_STOCK_NO;
     }
-  
-  const gchar *time_text = sign_time ? sign_time : _("Time not available");
-  const gchar *valid_time_text = make_valid_utf8 (time_text);
 
   // do we have enough info about the time to show an icon ?
+  const gchar *time_text = sign_time ? sign_time : _("Time not available");
+  
+  // this is a quick hack since poppler should send correct utf8 strings
+  // TODO: remove this
+  const gchar *valid_time_text = make_valid_utf8 (time_text);
 
   // create the 1st level node with the signature name
   gtk_tree_store_append (model, &parent, NULL);
@@ -444,21 +453,21 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
 
   // create the node with the validity status
   gtk_tree_store_append (model, &conclusion, &parent);
-  gtk_tree_store_set (model, &conclusion, COL_SIGN_TEXT, status,
+  gtk_tree_store_set (model, &conclusion, COL_SIGN_TEXT, status_text,
                                           COL_HAS_ICON, FALSE,
                                           COL_MAKE_BOLD, FALSE,
                                           -1);
 
   // append the remaining information about the signature as child nodes
   gtk_tree_store_append (model, &details, &conclusion);
-  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, doc_valid, 
+  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, doc_valid_text, 
                                        COL_HAS_ICON, TRUE,
                                        COL_ICON, doc_valid_icon,
                                        COL_MAKE_BOLD, FALSE,
                                        -1);
   
   gtk_tree_store_append (model, &details, &conclusion);
-  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, id_known, 
+  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, id_known_text, 
                                        COL_HAS_ICON, TRUE,
                                        COL_ICON, id_known_icon,
                                        COL_MAKE_BOLD, FALSE,
