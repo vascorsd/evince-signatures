@@ -41,11 +41,11 @@ typedef struct _EvDocumentSignaturesInterface EvDocumentSignaturesInterface;
 
 struct _EvDocumentSignaturesInterface
 {
-	GTypeInterface base_iface;
+  GTypeInterface base_iface;
 
-	/* Methods  */
-	gboolean  (* has_signatures) (EvDocumentSignatures *document_signatures);
-	GList    *(* get_signatures) (EvDocumentSignatures *document_signatures);
+  /* Methods  */
+  gboolean  (* has_signatures) (EvDocumentSignatures *document_signatures);
+  GList    *(* get_signatures) (EvDocumentSignatures *document_signatures);
 };
 
 GType     ev_document_signatures_get_type        (void) G_GNUC_CONST;

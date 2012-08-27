@@ -7405,7 +7405,6 @@ ev_window_init (EvWindow *ev_window)
 
 	/* Stub sidebar, for now */
 
-  // -------------------------------------------------- adicionar thumbnails à view
 	sidebar_widget = ev_sidebar_thumbnails_new ();
 	ev_window->priv->sidebar_thumbs = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7417,7 +7416,6 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
-  // ------------------------------------------------ adicionar links à view
 	sidebar_widget = ev_sidebar_links_new ();
 	ev_window->priv->sidebar_links = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7433,8 +7431,6 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
-  // ----------------------------------------------- adicionar attachments à view
-	sidebar_widget = ev_sidebar_attachments_new ();
 	ev_window->priv->sidebar_attachments = sidebar_widget;
 	g_signal_connect_object (sidebar_widget,
 				 "popup",
@@ -7444,7 +7440,6 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
-  // ----------------------------------------------- adicionar layers à view
 	sidebar_widget = ev_sidebar_layers_new ();
 	ev_window->priv->sidebar_layers = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7455,7 +7450,6 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
-  // ----------------------------------------------- adicionar anotações à view
 	sidebar_widget = ev_sidebar_annotations_new ();
 	ev_window->priv->sidebar_annots = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7474,7 +7468,6 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
-  // ------------------------------------------------ adicionar bookmarks à view
 	sidebar_widget = ev_sidebar_bookmarks_new ();
 	ev_window->priv->sidebar_bookmarks = sidebar_widget;
 	g_signal_connect (sidebar_widget,
@@ -7485,17 +7478,12 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
-  // -------------------------------------------- futuro adicionar signatures à view
   sidebar_widget = ev_sidebar_signatures_new ();
   ev_window->priv->sidebar_signatures = sidebar_widget;
-  // ------------- conectar signals
-  //
-  // -------------
+  // TODO: Signals?
   gtk_widget_show (sidebar_widget);
   ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
            sidebar_widget);
-  // ---------------------------------------------
-
 
 	ev_window->priv->view_box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 	ev_window->priv->scrolled_window =

@@ -130,7 +130,7 @@ static void pdf_document_file_exporter_iface_init        (EvFileExporterInterfac
 static void pdf_selection_iface_init                     (EvSelectionInterface           *iface);
 static void pdf_document_page_transition_iface_init      (EvDocumentTransitionInterface  *iface);
 static void pdf_document_text_iface_init                 (EvDocumentTextInterface        *iface);
-static int  pdf_document_get_n_pages			 (EvDocument                     *document);
+static int  pdf_document_get_n_pages                     (EvDocument                     *document);
 
 static EvLinkDest *ev_link_dest_from_dest    (PdfDocument       *pdf_document,
 					      PopplerDest       *dest);
@@ -3328,11 +3328,10 @@ pdf_document_signatures_has_signatures (EvDocumentSignatures *document)
   pdf_document->n_signatures = poppler_document_is_signed (pdf_document->document);
   //can_validate = popler_document_can_validate (pdf_document->document);
 
-	return (pdf_document->n_signatures > 0);
-	//return ((pdf_document->n_signatures > 0) && can_validate); 
+  return (pdf_document->n_signatures > 0);
+  //return ((pdf_document->n_signatures > 0) && can_validate);
 }
 
-/*
 static GList *
 pdf_document_signatures_get_signatures_future (EvDocumentSignatures *document)
 {
@@ -3376,22 +3375,21 @@ pdf_document_signatures_get_signatures_future (EvDocumentSignatures *document)
           // skip this signature, we can't get any mor info
           continue;
       }
-    
+
       signature = ev_signature_new (signer_name, sign_valid, signer_known, sign_time);
       ret_list = g_list_append (ret_list, signature);
   }
 
   return ret_list;
 }
-*/
 
 // quick and dirty, to test without caring about poppler
 static GList *
-pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
+pdf_document_signatures_get_signatures_test (EvDocumentSignatures *document)
 {
-	PdfDocument *pdf_document = PDF_DOCUMENT (document);
-	GList *ret_list = NULL;
-	EvSignature *signature;
+  PdfDocument *pdf_document = PDF_DOCUMENT (document);
+  GList *ret_list = NULL;
+  EvSignature *signature;
 
   // everything fine
   signature = ev_signature_new ("Tobias the man", TRUE, TRUE, "Yesterday");
@@ -3404,7 +3402,7 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
   // just hash nok
   signature = ev_signature_new ("Helena Sparta", FALSE, TRUE, "2nd century");
   ret_list = g_list_append (ret_list, signature);
-  
+
   // everything bad
   signature = ev_signature_new ("Lover's Inc", FALSE, FALSE, "1444 BC");
   ret_list = g_list_append (ret_list, signature);
@@ -3412,23 +3410,22 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
   return ret_list;
 }
 
-/*
 static GList *
-pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
+pdf_document_signatures_get_signatures_close_enough (EvDocumentSignatures *document)
 {
-	PdfDocument *pdf_document = PDF_DOCUMENT (document);
-	GList *ret_list = NULL;
-	EvSignature *signature;
+  PdfDocument *pdf_document = PDF_DOCUMENT (document);
+  GList *ret_list = NULL;
+  EvSignature *signature;
 
-	int validation;
-	gchar *signer_name;
-	gchar *sign_time;
-	gboolean sign_valid = TRUE;   // assume TRUE and change 
-	gboolean signer_known = TRUE; // according to the validation codes
+  int validation;
+  gchar *signer_name;
+  gchar *sign_time;
+  gboolean sign_valid = TRUE;   // assume TRUE and change
+  gboolean signer_known = TRUE; // according to the validation codes
   int i;
 
-	// call validate method
-	validation = poppler_document_validate_signature (pdf_document->document);
+  // call validate method
+  validation = poppler_document_validate_signature (pdf_document->document);
 
   switch (validation)
     {
@@ -3457,19 +3454,22 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
         for (i = 0; i < pdf_document->n_signatures; i++) {
           signer_name = poppler_document_signature_get_signername (pdf_document->document, i);
           sign_time = poppler_document_signature_get_time (pdf_document->document, i);
-  
+
           signature = ev_signature_new (signer_name, sign_valid, signer_known, sign_time);
           ret_list = g_list_append (ret_list, signature);
         }
-      } 
-  
+      }
+
   return ret_list;
 }
-*/
 
 static void
 pdf_document_document_signatures_iface_init (EvDocumentSignaturesInterface *iface)
 {
   iface->has_signatures = pdf_document_signatures_has_signatures;
-  iface->get_signatures = pdf_document_signatures_get_signatures;
+
+  // TODO: CHANGE HERE FOR TESTING!!!
+  iface->get_signatures = pdf_document_signatures_get_signatures_test;
+//  iface->get_signature = pdf_document_signatures_get_signatures_close_enough;
+//  iface->get_signature = pdf_document_signatures_get_signatures_future;
 }

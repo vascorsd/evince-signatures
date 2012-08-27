@@ -30,15 +30,15 @@ ev_document_signatures_default_init (EvDocumentSignaturesInterface *klass)
 gboolean
 ev_document_signatures_has_signatures (EvDocumentSignatures *document_signatures)
 {
-	EvDocumentSignaturesInterface *iface = EV_DOCUMENT_SIGNATURES_GET_IFACE (document_signatures);
+  EvDocumentSignaturesInterface *iface = EV_DOCUMENT_SIGNATURES_GET_IFACE (document_signatures);
 
-	return iface->has_signatures (document_signatures);
+  return iface->has_signatures (document_signatures);
 }
 
 GList *
 ev_document_signatures_get_signatures (EvDocumentSignatures *document_signatures)
 {
-	EvDocumentSignaturesInterface *iface = EV_DOCUMENT_SIGNATURES_GET_IFACE (document_signatures);
+  EvDocumentSignaturesInterface *iface = EV_DOCUMENT_SIGNATURES_GET_IFACE (document_signatures);
 
-	return iface->get_signatures (document_signatures);
+  return iface->get_signatures (document_signatures);
 }

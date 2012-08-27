@@ -138,9 +138,9 @@ job_finished_callback (EvJobSignatures *job, EvSidebarSignatures *sidebar)
   gboolean is_id_known;
   gchar *sign_time;
 
-	for (l = job->signatures; l && l->data; l = g_list_next (l)) {
+  for (l = job->signatures; l && l->data; l = g_list_next (l)) {
     EvSignature *signature = EV_SIGNATURE (l->data);
-    
+
     g_object_get (G_OBJECT (signature),
                   "signer-name", &signer_name,
                   "is-doc-valid", &is_doc_valid,
@@ -159,7 +159,7 @@ ev_sidebar_signatures_document_changed_cb (EvDocumentModel     *model,
 {
   EvDocument *document = ev_document_model_get_document (model);
   EvJob *job = ev_job_signatures_new (document);
- 
+
   if (!EV_IS_DOCUMENT_SIGNATURES (document))
     return;
 
@@ -167,11 +167,11 @@ ev_sidebar_signatures_document_changed_cb (EvDocumentModel     *model,
     return;
 
   g_signal_connect (job, "finished",
-			  G_CALLBACK (job_finished_callback),
-			  sidebar_sign);
-  
+        G_CALLBACK (job_finished_callback),
+        sidebar_sign);
+
   /* The priority doesn't matter for this job */
-	ev_job_scheduler_push_job (job, EV_JOB_PRIORITY_NONE);
+  ev_job_scheduler_push_job (job, EV_JOB_PRIORITY_NONE);
 }
 
 static void
@@ -180,7 +180,7 @@ ev_sidebar_signatures_set_model (EvSidebarPage   *sidebar_page,
 {
   g_signal_connect (model, "notify::document",
         G_CALLBACK (ev_sidebar_signatures_document_changed_cb),
-			  sidebar_page);
+        sidebar_page);
 }
 
 // ----------------------------------------------------------------------------------- Object construction
@@ -212,11 +212,11 @@ ev_sidebar_signatures_init (EvSidebarSignatures *ev_sign)
   priv->tree_view = gtk_tree_view_new ();
   GtkTreeViewColumn *col = gtk_tree_view_column_new ();
   GtkCellRenderer *renderer = gtk_cell_renderer_text_new ();
-  GtkCellRenderer *icon_renderer = gtk_cell_renderer_pixbuf_new (); 
+  GtkCellRenderer *icon_renderer = gtk_cell_renderer_pixbuf_new ();
 
 
   // create model
-  priv->model = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_BOOLEAN, 
+  priv->model = gtk_tree_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_BOOLEAN,
                                     G_TYPE_STRING, G_TYPE_BOOLEAN);
 
   // make the associations for it to show something
@@ -339,39 +339,39 @@ make_valid_utf8 (const gchar *name)
   GString *string;
   const gchar *remainder, *invalid;
   gint remaining_bytes, valid_bytes;
-  
+
   string = NULL;
   remainder = name;
   remaining_bytes = strlen (name);
-  
-  while (remaining_bytes != 0) 
+
+  while (remaining_bytes != 0)
     {
-      if (g_utf8_validate (remainder, remaining_bytes, &invalid)) 
-	break;
+      if (g_utf8_validate (remainder, remaining_bytes, &invalid))
+  break;
       valid_bytes = invalid - remainder;
-    
-      if (string == NULL) 
-	string = g_string_sized_new (remaining_bytes);
+
+      if (string == NULL)
+  string = g_string_sized_new (remaining_bytes);
 
       g_string_append_len (string, remainder, valid_bytes);
       g_string_append_c (string, '?');
-      
+
       remaining_bytes -= valid_bytes + 1;
       remainder = invalid + 1;
     }
-  
+
   if (string == NULL)
     return g_strdup (name);
-  
+
   g_string_append (string, remainder);
 
   g_assert (g_utf8_validate (string->str, -1, NULL));
-  
+
   return g_string_free (string, FALSE);
 }
 
 static void
-ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model, 
+ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
                                           gchar         *signer_name,
                                           gboolean      is_valid_doc,
                                           gboolean      is_id_known,
@@ -380,7 +380,7 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
   GtkTreeIter parent;
   GtkTreeIter conclusion;
   GtkTreeIter details;
-  
+
   const gchar *status_text;
   const gchar *sign_ok_icon;
 
@@ -398,12 +398,12 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
   //    (common case 2)
   //  * when document fails verification poppler won't
   //    even care to know if signer is known
-  if (is_valid_doc) 
+  if (is_valid_doc)
     {
       doc_valid_text = _("Document has not  been modified since the signature was applied");
       doc_valid_icon = GTK_STOCK_OK;
     }
-  else 
+  else
     {
       doc_valid_text = _("Document was changed since the signature was applied");
       doc_valid_icon = GTK_STOCK_NO;
@@ -436,7 +436,7 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
 
   // do we have enough info about the time to show an icon ?
   const gchar *time_text = sign_time ? sign_time : _("Time not available");
-  
+
   // this is a quick hack since poppler should send correct utf8 strings
   // TODO: remove this
   const gchar *valid_time_text = make_valid_utf8 (time_text);
@@ -444,7 +444,7 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
   // create the 1st level node with the signature name
   gtk_tree_store_append (model, &parent, NULL);
   gchar *signed_by = g_strdup_printf (_("Signed by: %s"), signer_name);
-  gtk_tree_store_set (model, &parent, COL_SIGN_TEXT, signed_by, 
+  gtk_tree_store_set (model, &parent, COL_SIGN_TEXT, signed_by,
                                       COL_ICON, sign_ok_icon,
                                       COL_HAS_ICON, TRUE,
                                       COL_MAKE_BOLD, TRUE,
@@ -460,21 +460,21 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
 
   // append the remaining information about the signature as child nodes
   gtk_tree_store_append (model, &details, &conclusion);
-  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, doc_valid_text, 
+  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, doc_valid_text,
                                        COL_HAS_ICON, TRUE,
                                        COL_ICON, doc_valid_icon,
                                        COL_MAKE_BOLD, FALSE,
                                        -1);
-  
+
   gtk_tree_store_append (model, &details, &conclusion);
-  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, id_known_text, 
+  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, id_known_text,
                                        COL_HAS_ICON, TRUE,
                                        COL_ICON, id_known_icon,
                                        COL_MAKE_BOLD, FALSE,
                                        -1);
-  
+
   gtk_tree_store_append (model, &details, &conclusion);
-  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, valid_time_text, 
+  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, valid_time_text,
                                        COL_HAS_ICON, FALSE,
                                        COL_MAKE_BOLD, FALSE,
                                        -1);

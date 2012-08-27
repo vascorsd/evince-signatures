@@ -43,13 +43,13 @@ typedef struct _EvSignaturePrivate EvSignaturePrivate;
 
 
 struct _EvSignature {
-	GObject base_instance;
-	
-	EvSignaturePrivate *priv;
+  GObject base_instance;
+
+  EvSignaturePrivate *priv;
 };
 
 struct _EvSignatureClass {
-	GObjectClass base_class;
+  GObjectClass base_class;
 };
 
 GType         ev_signature_get_type                (void) G_GNUC_CONST;

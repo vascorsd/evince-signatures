@@ -48,18 +48,18 @@ static void
 ev_signature_finalize (GObject *object)
 {
   EvSignature *signature = EV_SIGNATURE (object);
-  
+
   // clean all the private fields
   if (signature->priv->signer_name) {
     g_free (signature->priv->signer_name);
     signature->priv->signer_name = NULL;
   }
-  
+
   if (signature->priv->sign_time) {
     g_free (signature->priv->sign_time);
     signature->priv->sign_time = NULL;
   }
-  
+
   G_OBJECT_CLASS (ev_signature_parent_class)->finalize (object);
 }
 
@@ -70,25 +70,25 @@ ev_signature_set_property (GObject      *object,
                            GParamSpec   *param_spec)
 {
   EvSignature *signature = EV_SIGNATURE (object);
-  
+
   switch (prop_id)
     {
     case PROP_SIGN_NAME:
       signature->priv->signer_name = g_value_dup_string (value);
       break;
-      
+
     case PROP_DOC_VALID:
       signature->priv->is_doc_valid = g_value_get_boolean (value);
       break;
-      
+
     case PROP_ID_KNOWN:
       signature->priv->is_id_known = g_value_get_boolean (value);
       break;
-      
+
     case PROP_SIGN_TIME:
       signature->priv->sign_time = g_value_dup_string (value);
       break;
-      
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object,
                                          prop_id,
@@ -108,7 +108,7 @@ ev_signature_get_property (GObject    *object,
   switch (property_id)
     {
     case PROP_SIGN_NAME:
-      g_value_set_string (value, signature->priv->signer_name); 
+      g_value_set_string (value, signature->priv->signer_name);
       break;
 
     case PROP_DOC_VALID:
@@ -137,10 +137,10 @@ ev_signature_class_init (EvSignatureClass *klass)
   g_object_class->get_property = ev_signature_get_property;
 
   g_type_class_add_private (g_object_class, sizeof (EvSignaturePrivate));
-  
+
   /* Properties */
   g_object_class_install_property (g_object_class,
-                                   PROP_SIGN_NAME, 
+                                   PROP_SIGN_NAME,
                                    g_param_spec_string ("signer-name",
                                                         "Name",
                                                         "The name of the entity that signed",
@@ -186,7 +186,7 @@ static void
 ev_signature_init (EvSignature *signature)
 {
   signature->priv = EV_SIGNATURE_GET_PRIVATE (signature);
-  
+
   signature->priv->signer_name = NULL;
   signature->priv->sign_time = NULL;
 }
