@@ -7431,6 +7431,7 @@ ev_window_init (EvWindow *ev_window)
 	ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
 			     sidebar_widget);
 
+  sidebar_widget = ev_sidebar_attachments_new ();
 	ev_window->priv->sidebar_attachments = sidebar_widget;
 	g_signal_connect_object (sidebar_widget,
 				 "popup",
