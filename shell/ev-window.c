@@ -376,7 +376,7 @@ static void 	ev_window_emit_doc_loaded		(EvWindow	  *window);
 #endif
 static void     ev_window_setup_bookmarks               (EvWindow         *window);
 static void ev_window_sidebar_set_current_page          (EvWindow         *window,
-                                             	 			     const gchar      *page_id);
+                                                         const gchar      *page_id);
 static gchar *nautilus_sendto = NULL;
 
 G_DEFINE_TYPE (EvWindow, ev_window, GTK_TYPE_APPLICATION_WINDOW)
@@ -881,7 +881,7 @@ ev_window_info_message (EvWindow    *window,
 				    GTK_RESPONSE_NONE,
 				    NULL);
 	g_free (msg);
-	
+
 	g_signal_connect (area, "response",
 			  G_CALLBACK (ev_window_show_signatures_sidebar),
 			  window);
