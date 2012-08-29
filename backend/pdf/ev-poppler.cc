@@ -3342,22 +3342,22 @@ pdf_document_signatures_get_signatures_future (EvDocumentSignatures *document)
   gchar *signer_name;
   gchar *sign_time;
   int sign_status;
-  gboolean sign_valid = TRUE; // assume TRUE and change
-  gboolean sign_known = TRUE; // according to the validate codes
+  gboolean sign_valid = TRUE;   // assume TRUE and change
+  gboolean signer_known = TRUE; // according to the validate codes
 
   int i;
   // get the information related to each signature
   for (i = 0; i < pdf_document->n_signatures; i++) {
     signer_name = poppler_document_signature_get_signername (pdf_document->document, i);
     sign_time = poppler_document_signature_get_time (pdf_document->document, i);
-    validation = poppler_document_signature_validate (pdf_document->document, i;
+//    sign_status = poppler_document_signature_validate (pdf_document->document, i);
 
-    switch (validation)
+    switch (sign_status)
       {
         case POPPLER_SIGNATURE_VALID:
           g_print ("ev-poppler: sign valid\n");
           break;
-        case POPPLER_SIGNATURE_UNTRUSTED:
+        case POPPLER_SIGNATURE_UNTRUSTED_SIGNER:
           g_print ("ev-poppler: sign untrusted user\n");
           signer_known = FALSE;
           break;
@@ -3365,14 +3365,10 @@ pdf_document_signatures_get_signatures_future (EvDocumentSignatures *document)
           g_print ("ev-poppler: sign invalid\n");
           sign_valid = FALSE;
           break;
-        case POPPLER_SIGNATURE_INVALID_UNTRUSTED:
-          g_print ("ev-poppler: sign invalid\n");
-          sign_valid = FALSE;
-          signer_known = FALSE;
-          break;
         case POPPLER_SIGNATURE_GENERIC_ERROR:
           g_print ("ev-poppler: sign generic error\n");
-          // skip this signature, we can't get any mor info
+          // skip this signature, we can't get any more info,
+          // it could crash
           continue;
       }
 

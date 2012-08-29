@@ -75,10 +75,10 @@ static void ev_sidebar_signatures_tree_add_sign_info   (GtkTreeStore            
 
 
 static void job_finished_callback                      (EvJobSignatures            *job,
-                                                        EvSidebarSignatures        *sidebar);
+                                                        EvSidebarPage        *sidebar);
 static void ev_sidebar_signatures_document_changed_cb  (EvDocumentModel            *model,
                                                         GParamSpec                 *pspec,
-                                                        EvSidebarSignatures        *sidebar_sign);
+                                                        EvSidebarPage              *sidebar_page);
 
 static void render_icon_func                           (GtkTreeViewColumn          *column,
                                                         GtkCellRenderer            *renderer,
@@ -128,10 +128,10 @@ ev_sidebar_signatures_get_label (EvSidebarPage *sidebar_page)
 }
 
 static void
-job_finished_callback (EvJobSignatures *job, EvSidebarSignatures *sidebar)
+job_finished_callback (EvJobSignatures *job, EvSidebarPage *sidebar)
 {
+  GtkTreeStore *model = EV_SIDEBAR_SIGNATURES(sidebar)->priv->model;
   GList *l;
-  GtkTreeStore *model = sidebar->priv->model;
 
   gchar *signer_name;
   gboolean is_doc_valid;
@@ -155,20 +155,17 @@ job_finished_callback (EvJobSignatures *job, EvSidebarSignatures *sidebar)
 static void
 ev_sidebar_signatures_document_changed_cb (EvDocumentModel     *model,
                                            GParamSpec          *pspec,
-                                           EvSidebarSignatures *sidebar_sign)
+                                           EvSidebarPage       *sidebar_page)
 {
   EvDocument *document = ev_document_model_get_document (model);
   EvJob *job = ev_job_signatures_new (document);
 
-  if (!EV_IS_DOCUMENT_SIGNATURES (document))
-    return;
-
-  if (!ev_document_signatures_has_signatures (EV_DOCUMENT_SIGNATURES (document)))
+  if (!ev_sidebar_signatures_support_document (sidebar_page, document))
     return;
 
   g_signal_connect (job, "finished",
         G_CALLBACK (job_finished_callback),
-        sidebar_sign);
+        sidebar_page);
 
   /* The priority doesn't matter for this job */
   ev_job_scheduler_push_job (job, EV_JOB_PRIORITY_NONE);
