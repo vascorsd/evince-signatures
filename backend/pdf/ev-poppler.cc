@@ -3326,10 +3326,9 @@ pdf_document_signatures_has_signatures (EvDocumentSignatures *document)
   gboolean can_validate;
 
   pdf_document->n_signatures = poppler_document_is_signed (pdf_document->document);
-  //can_validate = popler_document_can_validate (pdf_document->document);
+  can_validate = poppler_document_can_validate (pdf_document->document);
 
-  return (pdf_document->n_signatures > 0);
-  //return ((pdf_document->n_signatures > 0) && can_validate);
+  return ((pdf_document->n_signatures > 0) && can_validate);
 }
 
 static GList *
@@ -3341,39 +3340,43 @@ pdf_document_signatures_get_signatures_future (EvDocumentSignatures *document)
 
   gchar *signer_name;
   gchar *sign_time;
-  int sign_status;
+  PopplerSignatureStatus sign_status;
   gboolean sign_valid = TRUE;   // assume TRUE and change
   gboolean signer_known = TRUE; // according to the validate codes
 
   int i;
   // get the information related to each signature
   for (i = 0; i < pdf_document->n_signatures; i++) {
-    signer_name = poppler_document_signature_get_signername (pdf_document->document, i);
-    sign_time = poppler_document_signature_get_time (pdf_document->document, i);
-//    sign_status = poppler_document_signature_validate (pdf_document->document, i);
+    // we need to call the validate first so poppler can get the other information
+    sign_status = poppler_document_signature_validate (pdf_document->document, i);
 
     switch (sign_status)
       {
         case POPPLER_SIGNATURE_VALID:
-          g_print ("ev-poppler: sign valid\n");
+          // everything is fine, he flags are already true,
+          // just keep going
           break;
         case POPPLER_SIGNATURE_UNTRUSTED_SIGNER:
-          g_print ("ev-poppler: sign untrusted user\n");
           signer_known = FALSE;
           break;
         case POPPLER_SIGNATURE_INVALID:
-          g_print ("ev-poppler: sign invalid\n");
           sign_valid = FALSE;
           break;
-        case POPPLER_SIGNATURE_GENERIC_ERROR:
-          g_print ("ev-poppler: sign generic error\n");
-          // skip this signature, we can't get any more info,
-          // it could crash
+        default:
+          g_warning ("error trying to get signature information");
+
+          // error could be POPPLER_SIGNATURE_GENERIC_ERROR or any
+          // other, doesn't matter, we can't do anything
+          // about it.
+
           continue;
       }
 
-      signature = ev_signature_new (signer_name, sign_valid, signer_known, sign_time);
-      ret_list = g_list_append (ret_list, signature);
+    signer_name = poppler_document_signature_get_signername (pdf_document->document, i);
+    sign_time = poppler_document_signature_get_time (pdf_document->document, i);
+
+    signature = ev_signature_new (signer_name, sign_valid, signer_known, sign_time);
+    ret_list = g_list_append (ret_list, signature);
   }
 
   return ret_list;
@@ -3421,7 +3424,7 @@ pdf_document_signatures_get_signatures_close_enough (EvDocumentSignatures *docum
   int i;
 
   // call validate method
-  validation = poppler_document_validate_signature (pdf_document->document);
+  //validation = poppler_document_validate_signature (pdf_document->document);
 
   switch (validation)
     {
@@ -3465,7 +3468,7 @@ pdf_document_document_signatures_iface_init (EvDocumentSignaturesInterface *ifac
   iface->has_signatures = pdf_document_signatures_has_signatures;
 
   // TODO: CHANGE HERE FOR TESTING!!!
-  iface->get_signatures = pdf_document_signatures_get_signatures_test;
-//  iface->get_signature = pdf_document_signatures_get_signatures_close_enough;
-//  iface->get_signature = pdf_document_signatures_get_signatures_future;
+//  iface->get_signatures = pdf_document_signatures_get_signatures_test;
+//  iface->get_signatures = pdf_document_signatures_get_signatures_close_enough;
+  iface->get_signatures = pdf_document_signatures_get_signatures_future;
 }
