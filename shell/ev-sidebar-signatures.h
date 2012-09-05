@@ -48,6 +48,7 @@ struct _EvSidebarSignaturesClass {
   GtkVBoxClass base_class;
 
   /* Signals */
+  void (*visible) (EvSidebarSignatures *ev_sidebar_signatures);
 };
 
 GType      ev_sidebar_signatures_get_type     (void) G_GNUC_CONST;

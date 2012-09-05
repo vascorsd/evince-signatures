@@ -47,6 +47,13 @@ enum {
   N_COLUMNS
 };
 
+enum {
+  SIGNATURES_VISIBLE,
+  N_SIGNALS
+};
+
+static guint signals[N_SIGNALS];
+
 // ------------------------------------------------------ define functions related to the interface binding
 static void ev_sidebar_signatures_page_iface_init      (EvSidebarPageInterface    *iface);
 static gboolean ev_sidebar_signatures_support_document (EvSidebarPage             *sidebar_page,
@@ -244,18 +251,42 @@ ev_sidebar_signatures_init (EvSidebarSignatures *ev_sign)
 }
 
 static void
+ev_sidebar_signatures_map (GtkWidget *widget)
+{
+  EvSidebarSignatures *sidebar;
+
+  sidebar = EV_SIDEBAR_SIGNATURES (widget);
+
+  GTK_WIDGET_CLASS (ev_sidebar_signatures_parent_class)->map (widget);
+
+  g_signal_emit (sidebar, signals[SIGNATURES_VISIBLE], 0);
+}
+
+static void
 ev_sidebar_signatures_class_init (EvSidebarSignaturesClass *ev_sidebar_signatures_class)
 {
   GObjectClass *g_object_class;
+  GtkWidgetClass *widget_class;
 
   g_object_class = G_OBJECT_CLASS (ev_sidebar_signatures_class);
+  widget_class = GTK_WIDGET_CLASS (ev_sidebar_signatures_class);
 
   g_object_class->get_property = ev_sidebar_signatures_get_property;
   g_object_class->dispose = ev_sidebar_signatures_dispose;
+  widget_class->map = ev_sidebar_signatures_map;
 
   g_object_class_override_property (g_object_class, PROP_WIDGET, "main-widget");
 
   g_type_class_add_private (g_object_class, sizeof (EvSidebarSignaturesPrivate));
+
+  signals[SIGNATURES_VISIBLE] =
+    g_signal_new ("signatures-visible",
+            G_TYPE_FROM_CLASS (g_object_class),
+            G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,
+            G_STRUCT_OFFSET (EvSidebarSignaturesClass, visible),
+            NULL, NULL,
+            g_cclosure_marshal_VOID__VOID,
+            G_TYPE_NONE, 0);
 }
 
 static void

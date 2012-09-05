@@ -776,10 +776,20 @@ ev_window_message_area_response_cb (EvMessageArea *area,
 }
 
 static void
+ev_window_message_area_sign_info_hide (EvWindow *window,
+				       GdkEvent *event,
+				       gpointer  data)
+{
+	//g_print ("ev_window_message_area_sign_info\n");
+  ev_window_set_message_area (window, NULL);
+}
+
+static void
 ev_window_show_signatures_sidebar (EvMessageArea *area,
                                    gint           response_id,
                                    EvWindow      *window)
 {
+	//g_print ("ev_windowshow_signatures_sidebar\n");
   // force the sidebar to show and open the signatures
   // panel
   ev_window_sidebar_set_current_page (window, SIGNATURES_SIDEBAR_ID);
@@ -788,7 +798,7 @@ ev_window_show_signatures_sidebar (EvMessageArea *area,
 
   // after showing the sidebar we can remove the message
   // from the window
-  ev_window_set_message_area (window, NULL);
+  //ev_window_set_message_area (window, NULL);
 }
 
 static void
@@ -860,10 +870,11 @@ typedef struct _PageTitleData {
 } PageTitleData;
 
 static void
-ev_window_info_message (EvWindow    *window,
+ev_window_info_message_signatures (EvWindow    *window,
 			   const gchar *format,
 			   ...)
 {
+	//g_print ("ev_window_info_messae_signatures\n");
 	GtkWidget *area;
 	va_list    args;
 	gchar     *msg = NULL;
@@ -882,6 +893,12 @@ ev_window_info_message (EvWindow    *window,
 				    NULL);
 	g_free (msg);
 
+// when the sidebar appears on the screen urn off the message
+  g_signal_connect_swapped (window->priv->sidebar_signatures, "signatures-visible",
+                    G_CALLBACK (ev_window_message_area_sign_info_hide),
+                    window);
+
+// force to show the sidebar when we click for more details
 	g_signal_connect (area, "response",
 			  G_CALLBACK (ev_window_show_signatures_sidebar),
 			  window);
@@ -1579,6 +1596,7 @@ ev_window_setup_document (EvWindow *ev_window)
 static void
 ev_window_set_document (EvWindow *ev_window, EvDocument *document)
 {
+	//g_print ("ev_window_set_document\n");
 	if (ev_window->priv->document == document)
 		return;
 
@@ -1592,9 +1610,14 @@ ev_window_set_document (EvWindow *ev_window, EvDocument *document)
 
   // if the document contains signatures show the top info message
   // so the user can quickly see this information
+  //g_print ("before metadata getting\n");
+  gboolean signatures_visible = gtk_widget_get_mapped (GTK_WIDGET (ev_window->priv->sidebar_signatures));
+//g_print ("sidebar_signatures_on_screen: %d\n", signatures_visible);
+
   if (EV_IS_DOCUMENT_SIGNATURES (document) &&
-      ev_document_signatures_has_signatures  (EV_DOCUMENT_SIGNATURES (document))) {
-    ev_window_info_message (ev_window, "%s",
+      ev_document_signatures_has_signatures  (EV_DOCUMENT_SIGNATURES (document)) &&
+      !signatures_visible) {
+    ev_window_info_message_signatures (ev_window, "%s",
       _("This document is signed, you should review the available information."));
   }
 
@@ -7239,6 +7262,7 @@ handle_sync_view_cb (EvEvinceWindow        *object,
 static void
 ev_window_init (EvWindow *ev_window)
 {
+	//g_print ("ev_window_ini\n");
 	GtkActionGroup *action_group;
 	GtkAccelGroup *accel_group;
 	GError *error = NULL;
