@@ -3341,20 +3341,19 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
   gchar *signer_name;
   gchar *sign_time;
   PopplerSignatureStatus sign_status;
-  gboolean sign_valid = TRUE;   // assume TRUE and change
-  gboolean signer_known = TRUE; // according to the validate codes
+  gboolean sign_valid = TRUE;   /* assume TRUE and change */
+  gboolean signer_known = TRUE; /* according to the validate codes */
 
   int i;
-  // get the information related to each signature
+  /* get the information related to each signature */
   for (i = 0; i < pdf_document->n_signatures; i++) {
-    // we need to call the validate first so poppler can get the other information
+    /* we need to call the validate first so poppler can get the other information */
     sign_status = poppler_document_signature_validate (pdf_document->document, i);
 
     switch (sign_status)
       {
         case POPPLER_SIGNATURE_VALID:
-          // everything is fine, he flags are already true,
-          // just keep going
+          /* everything is fine, he flags are already true, just keep going */
           break;
         case POPPLER_SIGNATURE_UNTRUSTED_SIGNER:
           signer_known = FALSE;
@@ -3365,9 +3364,9 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
         default:
           g_warning ("error trying to get signature information");
 
-          // error could be POPPLER_SIGNATURE_GENERIC_ERROR or any
-          // other, doesn't matter, we can't do anything
-          // about it.
+          /* error could be POPPLER_SIGNATURE_GENERIC_ERROR or any
+             other, doesn't matter, we can't do anything
+             about it. */
 
           continue;
       }
@@ -3382,7 +3381,7 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
   return ret_list;
 }
 
-// quick and dirty, to test without caring about poppler
+/* quick and dirty, to test without caring about poppler */
 static GList *
 pdf_document_signatures_get_signatures_test (EvDocumentSignatures *document)
 {
@@ -3390,19 +3389,19 @@ pdf_document_signatures_get_signatures_test (EvDocumentSignatures *document)
   GList *ret_list = NULL;
   EvSignature *signature;
 
-  // everything fine
+  /* everything fine */
   signature = ev_signature_new ("Tobias the man", TRUE, TRUE, "Yesterday");
   ret_list = g_list_append (ret_list, signature);
 
-  // just untrusted
+  /* just untrusted */
   signature = ev_signature_new ("Gervasio Constantino", TRUE, FALSE, "Tomorrow");
   ret_list = g_list_append (ret_list, signature);
 
-  // just hash nok
+  /* just hash nok */
   signature = ev_signature_new ("Helena Sparta", FALSE, TRUE, "2nd century");
   ret_list = g_list_append (ret_list, signature);
 
-  // everything bad
+  /* everything bad */
   signature = ev_signature_new ("Lover's Inc", FALSE, FALSE, "1444 BC");
   ret_list = g_list_append (ret_list, signature);
 
@@ -3414,7 +3413,7 @@ pdf_document_document_signatures_iface_init (EvDocumentSignaturesInterface *ifac
 {
   iface->has_signatures = pdf_document_signatures_has_signatures;
 
-  // TODO: CHANGE HERE FOR TESTING!!!
+  /* TODO: CHANGE HERE FOR TESTING!!! */
 //  iface->get_signatures = pdf_document_signatures_get_signatures_test;
   iface->get_signatures = pdf_document_signatures_get_signatures;
 }

@@ -788,8 +788,7 @@ ev_window_show_signatures_sidebar (EvMessageArea *area,
                                    gint           response_id,
                                    EvWindow      *window)
 {
-  // force the sidebar to show and open the signatures
-  // panel
+  /* force the sidebar to show and open the signatures panel */
   ev_window_sidebar_set_current_page (window, SIGNATURES_SIDEBAR_ID);
   update_chrome_flag (window, EV_CHROME_SIDEBAR, TRUE);
   update_chrome_visibility (window);
@@ -886,12 +885,12 @@ ev_window_info_message_signatures (EvWindow    *window,
                               NULL);
   g_free (msg);
 
-  // when the sidebar appears on the screen urn off the message
+  /* when the sidebar appears on the screen turn off the message */
   g_signal_connect_swapped (window->priv->sidebar_signatures, "signatures-visible",
                             G_CALLBACK (ev_window_message_area_sign_info_hide),
                             window);
 
-  // force to show the sidebar when we click for more details
+  /* force to show the sidebar when we click for more details */
   g_signal_connect (area, "response",
                     G_CALLBACK (ev_window_show_signatures_sidebar),
                     window);
@@ -1601,8 +1600,8 @@ ev_window_set_document (EvWindow *ev_window, EvDocument *document)
 
 	ev_window_set_message_area (ev_window, NULL);
 
-  // if the document contains signatures show the top info message
-  // so the user can quickly see this information
+  /* if the document contains signatures show the top info message
+     so the user can quickly see this information */
   gboolean signatures_visible = gtk_widget_get_mapped (GTK_WIDGET (ev_window->priv->sidebar_signatures));
 
   if (EV_IS_DOCUMENT_SIGNATURES (document) &&
@@ -7495,7 +7494,6 @@ ev_window_init (EvWindow *ev_window)
 
   sidebar_widget = ev_sidebar_signatures_new ();
   ev_window->priv->sidebar_signatures = sidebar_widget;
-  // TODO: Signals?
   gtk_widget_show (sidebar_widget);
   ev_sidebar_add_page (EV_SIDEBAR (ev_window->priv->sidebar),
            sidebar_widget);

@@ -1,7 +1,7 @@
 /* ev-signatures.h
  *  this file is part of evince, a gnome document viewer
  *
- * Copyright (C) 2012 Vasco Dias  <contact@vascodias.me>
+ * Copyright © 2012 Vasco Dias  <contact@vascodias.me>
  *
  * Evince is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -54,8 +54,8 @@ struct _EvSignatureClass {
 
 GType         ev_signature_get_type                (void) G_GNUC_CONST;
 EvSignature  *ev_signature_new                     (const gchar  *signer_name,
-                                                    gboolean     is_document_valid,
-                                                    gboolean     is_identity_known,
+                                                    gboolean      signature_valid,
+                                                    gboolean      signer_identity_known,
                                                     const gchar  *signature_time);
 
 G_END_DECLS

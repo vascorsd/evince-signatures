@@ -1,7 +1,7 @@
 /* ev-document-signatures.c
  *  this file is part of evince, a gnome document viewer
  *
- * Copyright (C) 2012 Vasco Dias  <contact@vascodias.me>
+ * Copyright © 2012 Vasco Dias  <contact@vascodias.me>
  *
  * Evince is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
+
+#include "config.h"
 
 #include "ev-document-signatures.h"
 

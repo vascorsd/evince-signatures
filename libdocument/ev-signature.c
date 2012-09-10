@@ -1,7 +1,7 @@
 /* ev-signature.c
  *  this file is part of evince, a gnome document viewer
  *
- * Copyright (C) 2012 Vasco Dias  <contact@vascodias.me>
+ * Copyright © 2012 Vasco Dias  <contact@vascodias.me>
  *
  * Evince is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <gtk/gtk.h>
 
@@ -26,17 +26,17 @@
 
 enum {
   PROP_0,
-  PROP_SIGN_NAME,
-  PROP_DOC_VALID,
-  PROP_ID_KNOWN,
+  PROP_SIGNER_NAME,
+  PROP_SIGN_VALID,
+  PROP_SIGNER_KNOWN,
   PROP_SIGN_TIME
 };
 
 struct _EvSignaturePrivate {
   gchar     *signer_name;
-  gboolean  is_doc_valid;
-  gboolean  is_id_known;
-  gchar     *sign_time;
+  gboolean   signature_valid;
+  gboolean   signer_identity_known;
+  gchar     *signature_time;
 };
 
 #define EV_SIGNATURE_GET_PRIVATE(object) \
@@ -49,16 +49,11 @@ ev_signature_finalize (GObject *object)
 {
   EvSignature *signature = EV_SIGNATURE (object);
 
-  // clean all the private fields
-  if (signature->priv->signer_name) {
-    g_free (signature->priv->signer_name);
-    signature->priv->signer_name = NULL;
-  }
+  g_free (signature->priv->signer_name);
+  signature->priv->signer_name = NULL;
 
-  if (signature->priv->sign_time) {
-    g_free (signature->priv->sign_time);
-    signature->priv->sign_time = NULL;
-  }
+  g_free (signature->priv->signature_time);
+  signature->priv->signature_time = NULL;
 
   G_OBJECT_CLASS (ev_signature_parent_class)->finalize (object);
 }
@@ -73,20 +68,20 @@ ev_signature_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_SIGN_NAME:
+    case PROP_SIGNER_NAME:
       signature->priv->signer_name = g_value_dup_string (value);
       break;
 
-    case PROP_DOC_VALID:
-      signature->priv->is_doc_valid = g_value_get_boolean (value);
+    case PROP_SIGN_VALID:
+      signature->priv->signature_valid = g_value_get_boolean (value);
       break;
 
-    case PROP_ID_KNOWN:
-      signature->priv->is_id_known = g_value_get_boolean (value);
+    case PROP_SIGNER_KNOWN:
+      signature->priv->signer_identity_known = g_value_get_boolean (value);
       break;
 
     case PROP_SIGN_TIME:
-      signature->priv->sign_time = g_value_dup_string (value);
+      signature->priv->signature_time = g_value_dup_string (value);
       break;
 
     default:
@@ -107,20 +102,20 @@ ev_signature_get_property (GObject    *object,
 
   switch (property_id)
     {
-    case PROP_SIGN_NAME:
+    case PROP_SIGNER_NAME:
       g_value_set_string (value, signature->priv->signer_name);
       break;
 
-    case PROP_DOC_VALID:
-      g_value_set_boolean (value, signature->priv->is_doc_valid);
+    case PROP_SIGN_VALID:
+      g_value_set_boolean (value, signature->priv->signature_valid);
       break;
 
-    case PROP_ID_KNOWN:
-      g_value_set_boolean (value, signature->priv->is_id_known);
+    case PROP_SIGNER_KNOWN:
+      g_value_set_boolean (value, signature->priv->signer_identity_known);
       break;
 
     case PROP_SIGN_TIME:
-      g_value_set_string (value, signature->priv->sign_time);
+      g_value_set_string (value, signature->priv->signature_time);
       break;
 
     default:
@@ -140,7 +135,7 @@ ev_signature_class_init (EvSignatureClass *klass)
 
   /* Properties */
   g_object_class_install_property (g_object_class,
-                                   PROP_SIGN_NAME,
+                                   PROP_SIGNER_NAME,
                                    g_param_spec_string ("signer-name",
                                                         "Name",
                                                         "The name of the entity that signed",
@@ -150,20 +145,20 @@ ev_signature_class_init (EvSignatureClass *klass)
                                                         G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (g_object_class,
-                                   PROP_DOC_VALID,
-                                   g_param_spec_boolean ("is-doc-valid",
-                                                        "IsDocumentValid",
-                                                        "If the document signed with the signature is valid",
+                                   PROP_SIGN_VALID,
+                                   g_param_spec_boolean ("signature-valid",
+                                                        "SignatureValid",
+                                                        "Is this signature considered valid or not",
                                                         FALSE,
                                                         G_PARAM_READWRITE |
                                                         G_PARAM_CONSTRUCT_ONLY |
                                                         G_PARAM_STATIC_STRINGS));
 
   g_object_class_install_property (g_object_class,
-                                   PROP_ID_KNOWN,
-                                   g_param_spec_boolean ("is-id-known",
-                                                        "IsIdentityKnown",
-                                                        "If the entity that signed is known",
+                                   PROP_SIGNER_KNOWN,
+                                   g_param_spec_boolean ("signer-identity-known",
+                                                        "SignerIdentityKnown",
+                                                        "Is the signer that created this signature known or not",
                                                         FALSE,
                                                         G_PARAM_READWRITE |
                                                         G_PARAM_CONSTRUCT_ONLY |
@@ -171,7 +166,7 @@ ev_signature_class_init (EvSignatureClass *klass)
 
   g_object_class_install_property (g_object_class,
                                    PROP_SIGN_TIME,
-                                   g_param_spec_string ("sign-time",
+                                   g_param_spec_string ("signature-time",
                                                        "SignatureTime",
                                                        "The time associated with the signature",
                                                        NULL,
@@ -188,20 +183,20 @@ ev_signature_init (EvSignature *signature)
   signature->priv = EV_SIGNATURE_GET_PRIVATE (signature);
 
   signature->priv->signer_name = NULL;
-  signature->priv->sign_time = NULL;
+  signature->priv->signature_time = NULL;
 }
 
 EvSignature *
 ev_signature_new (const gchar  *signer_name,
-                  gboolean     is_document_valid,
-                  gboolean     is_identity_known,
+                  gboolean      signature_valid,
+                  gboolean      signer_identity_known,
                   const gchar  *signature_time)
 {
   EvSignature *signature = g_object_new (EV_TYPE_SIGNATURE,
                                          "signer-name", signer_name,
-                                         "is-doc-valid", is_document_valid,
-                                         "is-id-known", is_identity_known,
-                                         "sign-time", signature_time,
+                                         "signature-valid", signature_valid,
+                                         "signer-identity-known", signer_identity_known,
+                                         "signature-time", signature_time,
                                          NULL);
 
   return signature;

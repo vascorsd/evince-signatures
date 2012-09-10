@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include <config.h>
+#include "config.h"
 
 #include "ev-jobs.h"
 #include "ev-document-links.h"
@@ -577,8 +577,7 @@ ev_job_signatures_dispose (GObject *object)
   job = EV_JOB_SIGNATURES (object);
 
   if (job->signatures) {
-    g_list_foreach (job->signatures, (GFunc)g_object_unref, NULL);
-    g_list_free (job->signatures);
+    g_list_free_full (job->signatures, (GDestroyNotify)g_object_unref);
     job->signatures = NULL;
   }
 
