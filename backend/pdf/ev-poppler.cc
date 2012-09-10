@@ -3362,8 +3362,6 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
           sign_valid = FALSE;
           break;
         default:
-          g_warning ("error trying to get signature information");
-
           /* error could be POPPLER_SIGNATURE_GENERIC_ERROR or any
              other, doesn't matter, we can't do anything
              about it. */
