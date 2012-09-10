@@ -865,7 +865,7 @@ typedef struct _PageTitleData {
 static void
 ev_window_info_message_signatures (EvWindow    *window,
                                    const gchar *format,
-                                   ...)
+                                   ...) G_GNUC_PRINTF(2,3)
 {
   GtkWidget *area;
   va_list    args;

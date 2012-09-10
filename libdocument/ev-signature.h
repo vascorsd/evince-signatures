@@ -50,6 +50,9 @@ struct _EvSignature {
 
 struct _EvSignatureClass {
   GObjectClass base_class;
+  
+  /*< private >*/
+  gpointer padding[8];
 };
 
 GType         ev_signature_get_type                (void) G_GNUC_CONST;

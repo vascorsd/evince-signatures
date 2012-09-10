@@ -429,30 +429,30 @@ ev_sidebar_signatures_tree_add_sign_info (GtkTreeStore  *model,
   g_free (signed_by);
 
   /* create the node with the validity status */
-  gtk_tree_store_append (model, &conclusion, &parent);
-  gtk_tree_store_set (model, &conclusion, COL_SIGN_TEXT, status_text,
-                                          COL_HAS_ICON, FALSE,
-                                          COL_MAKE_BOLD, FALSE,
-                                          -1);
+  gtk_tree_store_insert_with_values (model, &conclusion, &parent, -1,
+                                     COL_SIGN_TEXT, status_text,
+                                     COL_HAS_ICON, FALSE,
+                                     COL_MAKE_BOLD, FALSE,
+                                     -1);
 
   /* append the remaining information about the signature as child nodes */
-  gtk_tree_store_append (model, &details, &conclusion);
-  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, sign_valid_text,
-                                       COL_HAS_ICON, TRUE,
-                                       COL_ICON, sign_valid_icon,
-                                       COL_MAKE_BOLD, FALSE,
-                                       -1);
+  gtk_tree_store_insert_with_values (model, &details, &conclusion, -1,
+                                     COL_SIGN_TEXT, sign_valid_text,
+                                     COL_HAS_ICON, TRUE,
+                                     COL_ICON, sign_valid_icon,
+                                     COL_MAKE_BOLD, FALSE,
+                                     -1);
 
-  gtk_tree_store_append (model, &details, &conclusion);
-  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, signer_known_text,
-                                       COL_HAS_ICON, TRUE,
-                                       COL_ICON, signer_known_icon,
-                                       COL_MAKE_BOLD, FALSE,
-                                       -1);
+  gtk_tree_store_insert_with_values (model, &details, &conclusion, -1,
+                                     COL_SIGN_TEXT, signer_known_text,
+                                     COL_HAS_ICON, TRUE,
+                                     COL_ICON, signer_known_icon,
+                                     COL_MAKE_BOLD, FALSE,
+                                     -1);
 
-  gtk_tree_store_append (model, &details, &conclusion);
-  gtk_tree_store_set (model, &details, COL_SIGN_TEXT, time_text,
-                                       COL_HAS_ICON, FALSE,
-                                       COL_MAKE_BOLD, FALSE,
-                                       -1);
+  gtk_tree_store_insert_with_values (model, &details, &conclusion, -1,
+                                     COL_SIGN_TEXT, time_text,
+                                     COL_HAS_ICON, FALSE,
+                                     COL_MAKE_BOLD, FALSE,
+                                     -1);
 }

@@ -18,6 +18,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/**
+ * SECTION: ev-document-signatures
+ * @short_description: Interface that backends should implement for signatures support
+ *
+ * With this interface a backend can report if it supports digital signatures
+ * and access the information on each signature availabe on a list.
+ */
 #include "config.h"
 
 #include "ev-document-signatures.h"
@@ -29,6 +36,12 @@ ev_document_signatures_default_init (EvDocumentSignaturesInterface *klass)
 {
 }
 
+/**
+ * ev_document_signatures_has_signatures:
+ * @document_signatures: an #EvDocumentSignatures
+ *
+ * Returns: if the document has digital signatures and they can be verified
+ */
 gboolean
 ev_document_signatures_has_signatures (EvDocumentSignatures *document_signatures)
 {
@@ -37,6 +50,12 @@ ev_document_signatures_has_signatures (EvDocumentSignatures *document_signatures
   return iface->has_signatures (document_signatures);
 }
 
+/**
+ * ev_document_signatures_get_signatures:
+ * @document_signatures: an #EvDocumentSignatures
+ *
+ * Returns: A newly allocated #GList containing  newly allocated #EvSignature objects
+ */
 GList *
 ev_document_signatures_get_signatures (EvDocumentSignatures *document_signatures)
 {
