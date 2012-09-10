@@ -377,6 +377,9 @@ static void 	ev_window_emit_doc_loaded		(EvWindow	  *window);
 static void     ev_window_setup_bookmarks               (EvWindow         *window);
 static void ev_window_sidebar_set_current_page          (EvWindow         *window,
                                                          const gchar      *page_id);
+static void ev_window_info_message_signatures           (EvWindow    *window,
+                                                         const gchar *format,
+                                                         ...) G_GNUC_PRINTF(2,3);
 static gchar *nautilus_sendto = NULL;
 
 G_DEFINE_TYPE (EvWindow, ev_window, GTK_TYPE_APPLICATION_WINDOW)
@@ -865,7 +868,7 @@ typedef struct _PageTitleData {
 static void
 ev_window_info_message_signatures (EvWindow    *window,
                                    const gchar *format,
-                                   ...) G_GNUC_PRINTF(2,3)
+                                   ...)
 {
   GtkWidget *area;
   va_list    args;
