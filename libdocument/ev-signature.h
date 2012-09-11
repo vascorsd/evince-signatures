@@ -56,6 +56,7 @@ struct _EvSignatureClass {
 };
 
 GType         ev_signature_get_type                (void) G_GNUC_CONST;
+EvSignature  *ev_signature_new_empty               (void);
 EvSignature  *ev_signature_new                     (const gchar  *signer_name,
                                                     gboolean      signature_valid,
                                                     gboolean      signer_identity_known,

@@ -187,6 +187,14 @@ ev_signature_init (EvSignature *signature)
 }
 
 EvSignature *
+ev_signature_new_empty (void)
+{
+  EvSignature *signature = g_object_new (EV_TYPE_SIGNATURE, NULL);
+
+  return signature;
+}
+
+EvSignature *
 ev_signature_new (const gchar  *signer_name,
                   gboolean      signature_valid,
                   gboolean      signer_identity_known,

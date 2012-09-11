@@ -3365,7 +3365,10 @@ pdf_document_signatures_get_signatures (EvDocumentSignatures *document)
           /* error could be POPPLER_SIGNATURE_GENERIC_ERROR or any
              other, doesn't matter, we can't do anything
              about it. */
-
+          /* we will append an empty object without info so the frontend
+             knows there was a problem getting the info. This should be ok
+             because this should happen very rarely */
+          ret_list = g_list_append (ret_list, ev_signature_new_empty ());
           continue;
       }
 

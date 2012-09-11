@@ -70,6 +70,7 @@ static void ev_sidebar_signatures_get_property         (GObject                 
                                                         GParamSpec                *pspec);
 static void ev_sidebar_signatures_dispose              (GObject                   *object);
 
+static void ev_sidebar_signatures_tree_add_problem(GtkTreeStore               *model);
 
 static void ev_sidebar_signatures_tree_add_sign_info   (GtkTreeStore               *model,
                                                         gchar                      *signer_name,
@@ -149,7 +150,12 @@ job_finished_callback (EvJobSignatures *job, EvSidebarPage *sidebar)
                   "signature-time", &sign_time,
                   NULL);
 
-    ev_sidebar_signatures_tree_add_sign_info (model, signer_name, is_sign_valid, is_signer_known, sign_time);
+    /* if the signer-name comes NULL, we got a problem to report to the user
+     * because a signature should always have this info */
+    if (!signer_name)
+      ev_sidebar_signatures_tree_add_problem (model);
+    else
+      ev_sidebar_signatures_tree_add_sign_info (model, signer_name, is_sign_valid, is_signer_known, sign_time);
   }
 }
 
@@ -349,6 +355,31 @@ render_bold_func (GtkTreeViewColumn *column,
     {
       g_object_set (text_renderer, "weight-set", FALSE, NULL);
     }
+}
+
+static void
+ev_sidebar_signatures_tree_add_problem (GtkTreeStore *model)
+{
+  GtkTreeIter parent;
+  GtkTreeIter details;
+
+  const gchar *problem_text = _("Problem getting this signature");
+  const gchar *problem_icon = GTK_STOCK_DIALOG_WARNING;
+
+  const gchar *details_text = _("The file could be corrupted");
+
+  gtk_tree_store_insert_with_values (model, &parent, NULL, -1,
+                                     COL_SIGN_TEXT, problem_text,
+                                     COL_ICON, problem_icon,
+                                     COL_HAS_ICON, TRUE,
+                                     COL_MAKE_BOLD, TRUE,
+                                     -1);
+
+  gtk_tree_store_insert_with_values (model, &details, &parent, -1,
+                                     COL_SIGN_TEXT, details_text,
+                                     COL_HAS_ICON, FALSE,
+                                     COL_MAKE_BOLD, FALSE,
+                                     -1);
 }
 
 static void
